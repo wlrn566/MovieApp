@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.Request;
@@ -13,12 +14,15 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.wlrn566.movieapp.R;
+import com.wlrn566.movieapp.adapter.MovieListAdapter;
+import com.wlrn566.movieapp.vo.MovieVO;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 
 
@@ -59,15 +63,30 @@ public class MainActivity extends AppCompatActivity {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.d(TAG, "response = " + response);
+//                        Log.d(TAG, "response = " + response);
+                        ArrayList<MovieVO> mvoList = new ArrayList<>();
                         try {
                             // 박스오피스 순위리스트 추출
                             JSONObject boxOfficeResult = response.getJSONObject("boxOfficeResult");
                             JSONArray dailyBoxOfficeList = boxOfficeResult.getJSONArray("dailyBoxOfficeList");
-                            setList(dailyBoxOfficeList);
+                            // 행, 순위, 영화제목, 개봉일, 누적관객수, 영화코드 추출  -> VO로 묶어버리기
+                            for (int i = 0; i < dailyBoxOfficeList.length(); i++) {
+                                String rnum = dailyBoxOfficeList.getJSONObject(i).getString("rnum");
+                                String rank = dailyBoxOfficeList.getJSONObject(i).getString("rank");
+                                String movieCd = dailyBoxOfficeList.getJSONObject(i).getString("movieCd");
+                                String movieNm = dailyBoxOfficeList.getJSONObject(i).getString("movieNm");
+                                String openDt = dailyBoxOfficeList.getJSONObject(i).getString("openDt");
+                                String audiAcc = dailyBoxOfficeList.getJSONObject(i).getString("audiAcc");
+                                Log.d(TAG, rank + "등 movieNm = " + movieNm + " openDt = " + openDt + " audiAcc = " + audiAcc + " movieCd = " + movieCd);
+
+                                MovieVO mvo = new MovieVO(rnum, rank, movieCd, movieNm, openDt, audiAcc);
+                                mvoList.add(mvo);
+                            }
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
+                        // 리사이클러뷰 구현
+                        setRecycler(mvoList);
                     }
                 },
                 new Response.ErrorListener() {
@@ -81,27 +100,17 @@ public class MainActivity extends AppCompatActivity {
         queue.add(request);
     }
 
-    private void setList(JSONArray dailyBoxOfficeList) {
-        Log.d(TAG, "setList");
-        String movieNm;
-        String openDt;
-        String audiAcc;
-
-        // 영화제목, 개봉일, 누적관객수 추출
-        try {
-            for (int i = 0; i < dailyBoxOfficeList.length(); i++) {
-                movieNm = dailyBoxOfficeList.getJSONObject(i).getString("movieNm");
-                openDt = dailyBoxOfficeList.getJSONObject(i).getString("openDt");
-                audiAcc = dailyBoxOfficeList.getJSONObject(i).getString("audiAcc");
-                Log.d(TAG, i + 1 + "등 movieNm = " + movieNm + " openDt = " + openDt + " audiAcc = " + audiAcc);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-
-
-
+    // 리사이클러뷰 세팅
+    private void setRecycler(ArrayList<MovieVO> mvoList) {
+        Log.d(TAG, "setRecycler");
+        // 리사이클러뷰의 데이터가 변했을 때 사이즈를 동일하게 갱신하게 함
+        rv.setHasFixedSize(true);
+        // 리사이클러뷰 레이아웃
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        rv.setLayoutManager(layoutManager);
+        // 어댑터 할당
+        MovieListAdapter movieListAdapter = new MovieListAdapter(this, mvoList);
+        rv.setAdapter(movieListAdapter);
     }
 
     // 어제 날짜 구하기
@@ -112,7 +121,6 @@ public class MainActivity extends AppCompatActivity {
         // Calendar.DATE 로 오늘을 구하고 하루를 빼줌
         calendar.add(Calendar.DATE, -1);
         String result = simpleDateFormat.format(calendar.getTime());
-
         return result;
     }
 
