@@ -11,9 +11,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MovieApp"
-        android:usesCleartextTraffic="true"> <!--Volley Http 접근 허용-->
+        android:usesCleartextTraffic="true">
         <activity
-            android:name="com.wlrn566.movieapp.activity.MainActivity"
+            android:name=".activity.MovieDetailActivity"
+            android:exported="false" />
+        <!-- Volley Http 접근 허용 -->
+        <activity
+            android:name=".activity.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

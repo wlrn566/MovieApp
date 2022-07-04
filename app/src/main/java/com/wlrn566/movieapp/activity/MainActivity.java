@@ -2,38 +2,25 @@ package com.wlrn566.movieapp.activity;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 import com.wlrn566.movieapp.R;
-import com.wlrn566.movieapp.adapter.MovieListAdapter;
-import com.wlrn566.movieapp.vo.MovieVO;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
+import com.wlrn566.movieapp.Fragment.MainBoxOfficeFragment;
 
 
 public class MainActivity extends AppCompatActivity {
+    // 프래그먼트가 존재할 액티비티페이지
     private final String TAG = getClass().getName();
+    private long backPressedTime = 0;
 
-    RecyclerView rv;
-
-    // 1. 영화진흥위원회 api 사용(volley) -> 현재 상영 영화데이터 불러오기 -> 리사이클러뷰로 출력
-    // 2. 리스트 클릭 시 상세페이지
-    // 3. 커뮤니티페이지 -> 회원가입 및 로그인 (mariaDB + php)
+    // 영화 순위 정보와 영화 상세 정보를 알 수 있고, 영화에 따라 사용자들의 의견을 달 수 있는 기능.
+    // 프래그먼트를 이용
+    // 1. 일일 박스오피스 : 영화진흥위원회 api 사용(volley) -> 리사이클러뷰로 출력
+    // 2. 리스트 클릭 시 좀 더 세부내용 펼치기 : 네이버 검색 api 사용(volley) -> 박스오피스의 영화제목 담아서 호출
+    // 3. 상세보기 클릭 시 상세페이지 : KMDb api 호출
+    // 4. 커뮤니티페이지 -> 회원가입 및 로그인 (mariaDB + php)
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,87 +28,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        rv = findViewById(R.id.rv);
-
-        // 영화 api 불러오기
-        loadMovies();
-    }
-
-    private void loadMovies() {
-        RequestQueue queue = Volley.newRequestQueue(this);
-
-        final String boxOffice_url = "http://www.kobis.or.kr/kobisopenapi/webservice/rest/boxoffice/searchDailyBoxOfficeList.json";
-        final String key = getString(R.string.kobis_key);
-        final String targetDt = getYesterday();
-
-        String url = boxOffice_url + "?key=" + key + "&targetDt=" + targetDt;
-
-        Log.d(TAG, "url = " + url);
-
-        // api 호출 및 json 으로 받기
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-//                        Log.d(TAG, "response = " + response);
-                        ArrayList<MovieVO> mvoList = new ArrayList<>();
-                        try {
-                            // 박스오피스 순위리스트 추출
-                            JSONObject boxOfficeResult = response.getJSONObject("boxOfficeResult");
-                            JSONArray dailyBoxOfficeList = boxOfficeResult.getJSONArray("dailyBoxOfficeList");
-                            // 행, 순위, 영화제목, 개봉일, 누적관객수, 영화코드 추출  -> VO로 묶어버리기
-                            for (int i = 0; i < dailyBoxOfficeList.length(); i++) {
-                                String rnum = dailyBoxOfficeList.getJSONObject(i).getString("rnum");
-                                String rank = dailyBoxOfficeList.getJSONObject(i).getString("rank");
-                                String movieCd = dailyBoxOfficeList.getJSONObject(i).getString("movieCd");
-                                String movieNm = dailyBoxOfficeList.getJSONObject(i).getString("movieNm");
-                                String openDt = dailyBoxOfficeList.getJSONObject(i).getString("openDt");
-                                String audiAcc = dailyBoxOfficeList.getJSONObject(i).getString("audiAcc");
-                                Log.d(TAG, rank + "등 movieNm = " + movieNm + " openDt = " + openDt + " audiAcc = " + audiAcc + " movieCd = " + movieCd);
-
-                                MovieVO mvo = new MovieVO(rnum, rank, movieCd, movieNm, openDt, audiAcc);
-                                mvoList.add(mvo);
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        // 리사이클러뷰 구현
-                        setRecycler(mvoList);
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError e) {
-                        Log.d(TAG, "error = " + e.toString());
-                    }
-                });
-
-        request.setShouldCache(false);
-        queue.add(request);
-    }
-
-    // 리사이클러뷰 세팅
-    private void setRecycler(ArrayList<MovieVO> mvoList) {
-        Log.d(TAG, "setRecycler");
-        // 리사이클러뷰의 데이터가 변했을 때 사이즈를 동일하게 갱신하게 함
-        rv.setHasFixedSize(true);
-        // 리사이클러뷰 레이아웃
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        rv.setLayoutManager(layoutManager);
-        // 어댑터 할당
-        MovieListAdapter movieListAdapter = new MovieListAdapter(this, mvoList);
-        rv.setAdapter(movieListAdapter);
-    }
-
-    // 어제 날짜 구하기
-    private String getYesterday() {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
-        Calendar calendar = Calendar.getInstance();
-        // Calendar 함수의 add 이용
-        // Calendar.DATE 로 오늘을 구하고 하루를 빼줌
-        calendar.add(Calendar.DATE, -1);
-        String result = simpleDateFormat.format(calendar.getTime());
-        return result;
+        // 메인 프레그먼트로 이동(MainBoxOfficeFragment)
+        MainBoxOfficeFragment mainBoxOfficeFragment = new MainBoxOfficeFragment();
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.main_activity, mainBoxOfficeFragment)
+                .addToBackStack(null)
+                .commit();
     }
 
     @Override
@@ -152,5 +64,26 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         Log.d(TAG, "onDestroy");
         super.onDestroy();
+    }
+
+    @Override
+    public void onBackPressed() {
+        // 백스택이 있으면 스택 프래그먼트 호출
+        if (getSupportFragmentManager().getBackStackEntryCount() > 1) {
+            Log.d(TAG, "BackStackCount = " + getSupportFragmentManager().getBackStackEntryCount());
+            getSupportFragmentManager().popBackStack();
+        } else {
+            // 뒤로가기 키를 누른 후 2초가 지났으면 Toast 출력
+            if (System.currentTimeMillis() > backPressedTime + 2000) {
+                backPressedTime = System.currentTimeMillis();
+                Toast toast = Toast.makeText(this, "한번 더 누르시면 종료됩니다.", Toast.LENGTH_SHORT);
+                toast.show();
+                return;
+            }
+            // 뒤로가기 키를 누른 후 2초가 안지났으면 종료
+            if (System.currentTimeMillis() <= backPressedTime + 2000) {
+                finish();
+            }
+        }
     }
 }

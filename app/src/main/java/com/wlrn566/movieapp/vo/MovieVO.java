@@ -19,38 +19,23 @@ public class MovieVO {
     String audiAcc;
     String scrnCnt;
     String showCnt;
+    String image;
+    String director;
+    String actor;
+    String userRating;
 
     public MovieVO() {
     }
 
-    public MovieVO(String rnum, String rank, String movieCd, String movieNm, String openDt, String audiAcc) {
-        this.rnum = rnum;
+    public MovieVO(String rank, String movieNm, String openDt, String audiAcc, String image, String director, String actor, String userRating) {
         this.rank = rank;
-        this.movieCd = movieCd;
         this.movieNm = movieNm;
         this.openDt = openDt;
         this.audiAcc = audiAcc;
-    }
-
-    public MovieVO(String rnum, String rank, String rankInten, String rankOldAndNew, String movieCd, String movieNm, String openDt, String salesAmt, String salesShare, String salesInten, String salesChange, String salesAcc, String audiCnt, String audiInten, String audiChange, String audiAcc, String scrnCnt, String showCnt) {
-        this.rnum = rnum;
-        this.rank = rank;
-        this.rankInten = rankInten;
-        this.rankOldAndNew = rankOldAndNew;
-        this.movieCd = movieCd;
-        this.movieNm = movieNm;
-        this.openDt = openDt;
-        this.salesAmt = salesAmt;
-        this.salesShare = salesShare;
-        this.salesInten = salesInten;
-        this.salesChange = salesChange;
-        this.salesAcc = salesAcc;
-        this.audiCnt = audiCnt;
-        this.audiInten = audiInten;
-        this.audiChange = audiChange;
-        this.audiAcc = audiAcc;
-        this.scrnCnt = scrnCnt;
-        this.showCnt = showCnt;
+        this.image = image;
+        this.director = director;
+        this.actor = actor;
+        this.userRating = userRating;
     }
 
     public String getRnum() {
