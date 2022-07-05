@@ -135,7 +135,7 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.View
                 holder.openDt_tv.setText("개봉일 : " + mvo.getOpenDt());
                 holder.audiAcc_tv.setText("누적 관객수 : " + mvo.getAudiAcc());
 
-                holder.pudDate_tv.setText(mvo.getPubDate());
+                holder.pudDate_tv.setText("제작년도 : "+mvo.getPubDate());
                 holder.actor_tv.setText(mvo.getActor());
                 holder.userRating_tv.setText(mvo.getUserRating());
                 Glide.with(mcontext).load(mvo.getImage()).override(100, 100).into(holder.image);

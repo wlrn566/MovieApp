@@ -65,28 +65,6 @@
             android:orientation="horizontal"
             app:layout_constraintTop_toBottomOf="@+id/info2_ll">
 
-            <TextView
-                android:id="@+id/openDt_tv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="2022-06-22"
-                android:textAlignment="center"
-                android:textColor="#000000"
-                android:textSize="15sp"
-                app:layout_constraintLeft_toRightOf="@+id/image"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/audiAcc_tv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="누적 관객수 : 12345612"
-                android:textAlignment="center"
-                android:textColor="#000000"
-                android:textSize="15sp"
-                app:layout_constraintLeft_toRightOf="@+id/image"
-                app:layout_constraintTop_toBottomOf="@+id/openDt_tv" />
-
             <ImageView
                 android:id="@+id/image"
                 android:layout_width="100dp"
@@ -96,28 +74,61 @@
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
-                android:id="@+id/pudDate_tv"
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="제작년도 : 2021"
-                android:textColor="#000000"
-                android:textSize="15sp"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginLeft="10dp"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toRightOf="@+id/image"
-                app:layout_constraintTop_toBottomOf="@+id/audiAcc_tv" />
+                android:layout_height="100dp">
 
-            <TextView
-                android:id="@+id/actor_tv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:text="출연 배우 : "
-                android:textColor="#000000"
-                android:textSize="15sp"
-                app:layout_constraintLeft_toRightOf="@+id/image"
-                app:layout_constraintTop_toBottomOf="@+id/pudDate_tv" />
+                <TextView
+                    android:id="@+id/openDt_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2022-06-22"
+                    android:textAlignment="center"
+                    android:textColor="#000000"
+                    android:textSize="15sp"
+                    app:layout_constraintBottom_toTopOf="@+id/actor_tv"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/actor_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="출연 배우 : "
+                    android:textColor="#000000"
+                    android:textSize="15sp"
+                    app:layout_constraintBottom_toTopOf="@+id/audiAcc_tv"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/openDt_tv" />
+
+                <TextView
+                    android:id="@+id/audiAcc_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="누적 관객수 : 12345612"
+                    android:textColor="#000000"
+                    android:textSize="15sp"
+                    app:layout_constraintBottom_toTopOf="@+id/pudDate_tv"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/actor_tv" />
+
+                <TextView
+                    android:id="@+id/pudDate_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="제작년도 : 2021"
+                    android:textColor="#000000"
+                    android:textSize="15sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/audiAcc_tv" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <Button
                 android:id="@+id/detailPage_btn"
@@ -126,7 +137,7 @@
                 android:background="@drawable/ic_move"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/actor_tv" />
+                app:layout_constraintTop_toBottomOf="@+id/image" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
