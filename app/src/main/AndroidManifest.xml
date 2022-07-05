@@ -12,9 +12,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MovieApp"
         android:usesCleartextTraffic="true">
-        <activity
-            android:name=".activity.MovieDetailActivity"
-            android:exported="false" />
         <!-- Volley Http 접근 허용 -->
         <activity
             android:name=".activity.MainActivity"

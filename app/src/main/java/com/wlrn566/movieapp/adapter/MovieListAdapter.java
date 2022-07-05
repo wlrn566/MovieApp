@@ -17,27 +17,11 @@ import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
-import com.wlrn566.movieapp.BuildConfig;
 import com.wlrn566.movieapp.R;
-import com.wlrn566.movieapp.vo.MovieDetailVO;
 import com.wlrn566.movieapp.vo.MovieVO;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.ViewHolder> {
     private final String TAG = getClass().getName();
@@ -84,9 +68,9 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.View
                     int position = getAdapterPosition();
                     if (position != RecyclerView.NO_POSITION) {
                         if (onClickListener != null) {
-                            String movieNm = map.get(String.valueOf(position + 1)).getMovieNm();
-                            onClickListener.onClickListener(view, movieNm);
-//                            Log.d(TAG,"onclick movieNm = "+movieNm);
+                            MovieVO mvo = map.get(String.valueOf(position + 1));
+                            onClickListener.onClickListener(view, mvo);
+//                            Log.d(TAG,"onclick mvo = "+mvo);
                         }
                     }
                 }
@@ -135,7 +119,7 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.View
                 holder.openDt_tv.setText("개봉일 : " + mvo.getOpenDt());
                 holder.audiAcc_tv.setText("누적 관객수 : " + mvo.getAudiAcc());
 
-                holder.pudDate_tv.setText("제작년도 : "+mvo.getPubDate());
+                holder.pudDate_tv.setText("제작년도 : " + mvo.getPubDate());
                 holder.actor_tv.setText(mvo.getActor());
                 holder.userRating_tv.setText(mvo.getUserRating());
                 Glide.with(mcontext).load(mvo.getImage()).override(100, 100).into(holder.image);
@@ -150,7 +134,7 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.View
 
     // 카드뷰 펼치기
     public interface onClickListener {
-        void onClickListener(View v, String movieNm);
+        void onClickListener(View v, MovieVO mvo);
     }
 
     // 클릭리스너 객체 전달 변수

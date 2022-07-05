@@ -1,6 +1,8 @@
 package com.wlrn566.movieapp.vo;
 
-public class MovieVO {
+import java.io.Serializable;
+
+public class MovieVO implements Serializable {
     String rnum;
     String rank;
     String rankInten;

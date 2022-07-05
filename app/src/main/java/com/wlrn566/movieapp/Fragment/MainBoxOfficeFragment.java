@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.util.Log;
-import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,7 +25,6 @@ import com.facebook.shimmer.ShimmerFrameLayout;
 import com.wlrn566.movieapp.BuildConfig;
 import com.wlrn566.movieapp.R;
 import com.wlrn566.movieapp.adapter.MovieListAdapter;
-import com.wlrn566.movieapp.vo.MovieDetailVO;
 import com.wlrn566.movieapp.vo.MovieVO;
 
 import org.json.JSONArray;
@@ -34,7 +32,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,7 +42,8 @@ public class MainBoxOfficeFragment extends Fragment {
     private ShimmerFrameLayout shimmer;  // UI 로딩 창
     private SwipeRefreshLayout refresh;  // 새로고침 창
 
-    private HashMap<String, MovieVO> map;
+    private HashMap<String, MovieVO> map;  // 데이터 담을 공간
+
     RecyclerView rv;
 
     @Override
@@ -81,24 +79,19 @@ public class MainBoxOfficeFragment extends Fragment {
                 refresh.setRefreshing(false);
             }
         });
-
-
-
         return rootView;
     }
 
     private void loadBoxOffice() {
-        // 데이터 담을 공간
-        map = new HashMap<>();
+        map = new HashMap<>();  // 초기화 시켜주기
 
-        // shimmer 스켈레톤 UI 설정
-        setShimmer(map);
+        setShimmer(map);  // shimmer 스켈레톤 UI 설정
 
         RequestQueue queue = Volley.newRequestQueue(getActivity());
 
         final String boxOffice_url = "http://www.kobis.or.kr/kobisopenapi/webservice/rest/boxoffice/searchDailyBoxOfficeList.json";
         final String key = BuildConfig.KOBIS_KEY;
-        final String targetDt = getYesterday();
+        final String targetDt = getYesterday();  // 당일 순위는 나오지 않아서 1일 전의 데이터를 불러와야 함
 
         String url = boxOffice_url + "?key=" + key + "&targetDt=" + targetDt;
 
@@ -136,7 +129,6 @@ public class MainBoxOfficeFragment extends Fragment {
                         Log.d(TAG, "error = " + e.toString());
                     }
                 });
-
         request.setShouldCache(false);
         queue.add(request);
     }
@@ -232,7 +224,6 @@ public class MainBoxOfficeFragment extends Fragment {
                 return params;
             }
         };
-
         request.setShouldCache(false);
         queue.add(request);
     }
@@ -251,11 +242,11 @@ public class MainBoxOfficeFragment extends Fragment {
         // 어댑터 클릭리스너 할당 -> 영화 제목을 넘겨서 네이버 검색 api 호출
         movieListAdapter.setOnClickListener(new MovieListAdapter.onClickListener() {
             @Override
-            public void onClickListener(View v, String movieNm) {
-                Log.d(TAG, "click movie = " + movieNm);
+            public void onClickListener(View v, MovieVO mvo) {
+                Log.d(TAG, "click mvo = " + mvo);
                 // Bundle 로 영화이름 넘겨주기
                 Bundle bundle = new Bundle();
-                bundle.putString("movieNm", movieNm);
+                bundle.putSerializable("mvo", mvo);
                 MovieDetailFragment movieDetailFragment = new MovieDetailFragment();
                 movieDetailFragment.setArguments(bundle);  // bundle set
                 getActivity().getSupportFragmentManager().beginTransaction()
@@ -266,17 +257,17 @@ public class MainBoxOfficeFragment extends Fragment {
         });
     }
 
-    private void setShimmer(HashMap<String, MovieVO> map){
-        Log.d(TAG,"loading");
+    private void setShimmer(HashMap<String, MovieVO> map) {
+        Log.d(TAG, "loading");
         // 데이터가 다 들어왔을 때
-        if(map.size() == 10){
+        if (map.size() == 10) {
             shimmer.stopShimmer();
             shimmer.setVisibility(View.GONE);
             rv.setVisibility(View.VISIBLE);
-            
+
             // 리사이클러뷰 구현
             setRecycler(map);
-        }else{
+        } else {
             shimmer.startShimmer();
             shimmer.setVisibility(View.VISIBLE);
             rv.setVisibility(View.GONE);
