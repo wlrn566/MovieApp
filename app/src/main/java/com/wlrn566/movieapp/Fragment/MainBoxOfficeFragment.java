@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.util.Log;
 import android.util.SparseBooleanArray;
@@ -21,6 +22,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.facebook.shimmer.ShimmerFrameLayout;
 import com.wlrn566.movieapp.BuildConfig;
 import com.wlrn566.movieapp.R;
 import com.wlrn566.movieapp.adapter.MovieListAdapter;
@@ -40,9 +42,10 @@ import java.util.Map;
 public class MainBoxOfficeFragment extends Fragment {
     private final String TAG = getClass().getName();
     private View rootView;
+    private ShimmerFrameLayout shimmer;  // UI 로딩 창
+    private SwipeRefreshLayout refresh;  // 새로고침 창
 
-    private HashMap<String, MovieVO> map = new HashMap<>();
-
+    private HashMap<String, MovieVO> map;
     RecyclerView rv;
 
     @Override
@@ -64,14 +67,33 @@ public class MainBoxOfficeFragment extends Fragment {
         rootView = inflater.inflate(R.layout.fragment_main_box_office, container, false);
 
         rv = rootView.findViewById(R.id.rv);
+        shimmer = rootView.findViewById(R.id.shimmer);
+        refresh = rootView.findViewById(R.id.refresh);
 
-        // 영화 순위 출력 (영화진흥위원회 api)
+        // 영화 순위 출력
         loadBoxOffice();
+
+        // 아래로 당기면 새로고침 시킴
+        refresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                loadBoxOffice();
+                refresh.setRefreshing(false);
+            }
+        });
+
+
 
         return rootView;
     }
 
     private void loadBoxOffice() {
+        // 데이터 담을 공간
+        map = new HashMap<>();
+
+        // shimmer 스켈레톤 UI 설정
+        setShimmer(map);
+
         RequestQueue queue = Volley.newRequestQueue(getActivity());
 
         final String boxOffice_url = "http://www.kobis.or.kr/kobisopenapi/webservice/rest/boxoffice/searchDailyBoxOfficeList.json";
@@ -193,8 +215,7 @@ public class MainBoxOfficeFragment extends Fragment {
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        // 리사이클러뷰 구현
-                        setRecycler(map);
+                        setShimmer(map);
                     }
                 },
                 new Response.ErrorListener() {
@@ -243,7 +264,23 @@ public class MainBoxOfficeFragment extends Fragment {
                         .commit();
             }
         });
+    }
 
+    private void setShimmer(HashMap<String, MovieVO> map){
+        Log.d(TAG,"loading");
+        // 데이터가 다 들어왔을 때
+        if(map.size() == 10){
+            shimmer.stopShimmer();
+            shimmer.setVisibility(View.GONE);
+            rv.setVisibility(View.VISIBLE);
+            
+            // 리사이클러뷰 구현
+            setRecycler(map);
+        }else{
+            shimmer.startShimmer();
+            shimmer.setVisibility(View.VISIBLE);
+            rv.setVisibility(View.GONE);
+        }
     }
 
     // 어제 날짜 구하기

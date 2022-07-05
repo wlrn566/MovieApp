@@ -1,16 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_fragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/main_fragment"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".Fragment.MainBoxOfficeFragment">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/refresh"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/shimmer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <include layout="@layout/shimmer_loading" />
+
+            <include layout="@layout/shimmer_loading" />
+
+            <include layout="@layout/shimmer_loading" />
+
+            <include layout="@layout/shimmer_loading" />
+
+            <include layout="@layout/shimmer_loading" />
+
+            <include layout="@layout/shimmer_loading" />
+
+            <include layout="@layout/shimmer_loading" />
+
+            <include layout="@layout/shimmer_loading" />
+
+            <include layout="@layout/shimmer_loading" />
+
+            <include layout="@layout/shimmer_loading" />
+        </LinearLayout>
+
+    </com.facebook.shimmer.ShimmerFrameLayout>
 
 </FrameLayout>
