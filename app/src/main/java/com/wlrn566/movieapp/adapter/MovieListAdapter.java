@@ -7,6 +7,7 @@ import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -23,6 +24,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.bumptech.glide.Glide;
 import com.wlrn566.movieapp.BuildConfig;
 import com.wlrn566.movieapp.R;
 import com.wlrn566.movieapp.vo.MovieDetailVO;
@@ -39,28 +41,26 @@ import java.util.Objects;
 
 public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.ViewHolder> {
     private final String TAG = getClass().getName();
-    private ArrayList<MovieVO> mdata;
+    private HashMap<String, MovieVO> map;
     private Context mcontext;
 
-    // 리스트를 열고 닫기 위해
-    // Item 의 클릭 상태를 저장할 array 객체
-    private SparseBooleanArray selectedItems = new SparseBooleanArray();
-    // 직전에 클릭됐던 Item 의 position
-    private int prePosition = -1;
+    // 뷰 펼치고 닫기 상태 저장
+    private SparseBooleanArray sparseBooleanArray = new SparseBooleanArray();
 
     // 데이터 받기
-    public MovieListAdapter(Context context, ArrayList<MovieVO> data) {
+    public MovieListAdapter(Context context, HashMap<String, MovieVO> map) {
         this.mcontext = context;
-        this.mdata = data;
+        this.map = map;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         CardView list_cardView;
         TextView rank_tv, movieNm_tv, openDt_tv, audiAcc_tv;
 
-        ConstraintLayout detail_cl;
-        TextView title_tv, pudDate_tv, actor_tv;
+        ConstraintLayout info3_cl;
+        TextView pudDate_tv, actor_tv, userRating_tv;
         ImageView image;
+        Button detailPage_btn;
 
         // UI 선언
         public ViewHolder(View v) {
@@ -69,31 +69,48 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.View
             movieNm_tv = v.findViewById(R.id.movieNm_tv);
             openDt_tv = v.findViewById(R.id.openDt_tv);
             audiAcc_tv = v.findViewById(R.id.audiAcc_tv);
-            detail_cl = v.findViewById(R.id.detail_cl);
-            detail_cl.setVisibility(View.GONE);
-            title_tv = v.findViewById(R.id.title_tv);
+            info3_cl = v.findViewById(R.id.info3_cl);
+            info3_cl.setVisibility(View.GONE);
             pudDate_tv = v.findViewById(R.id.pudDate_tv);
             actor_tv = v.findViewById(R.id.actor_tv);
             image = v.findViewById(R.id.image);
+            userRating_tv = v.findViewById(R.id.userRating_tv);
 
             // 클릭 이벤트 부여
+            detailPage_btn = v.findViewById(R.id.detailPage_btn);
+            detailPage_btn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        if (onClickListener != null) {
+                            String movieNm = map.get(String.valueOf(position + 1)).getMovieNm();
+                            onClickListener.onClickListener(view, movieNm);
+//                            Log.d(TAG,"onclick movieNm = "+movieNm);
+                        }
+                    }
+                }
+            });
+
             list_cardView = v.findViewById(R.id.list_cardView);
             list_cardView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     int position = getAdapterPosition();
                     if (position != RecyclerView.NO_POSITION) {
-                        // 클릭리스너 호출
-                        if (onClickListener != null) {
-                            String movieNm = mdata.get(position).getMovieNm();
-                            onClickListener.onClickListener(view, movieNm);
-                            detail_cl.setVisibility(View.VISIBLE);
+                        if (sparseBooleanArray.get(position)) {
+                            // 펼쳐져 있다면 해당 포지션 삭제
+                            sparseBooleanArray.delete(position);
+                        } else {
+                            // 닫혀 있다면 해당 포지션 true 로 저장
+                            sparseBooleanArray.put(position, true);
                         }
+                        // View 펼치고 닫기
+                        changeView(info3_cl, position);
                     }
                 }
             });
         }
-
     }
 
     @NonNull
@@ -110,19 +127,28 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.View
     // 각 뷰홀더의 UI에 데이터 삽입
     @Override
     public void onBindViewHolder(@NonNull MovieListAdapter.ViewHolder holder, int position) {
-        MovieVO mvo = mdata.get(position);
-        holder.rank_tv.setText(mvo.getRank());
-        holder.movieNm_tv.setText(mvo.getMovieNm());
-        holder.openDt_tv.setText(mvo.getOpenDt());
-        holder.audiAcc_tv.setText(mvo.getAudiAcc());
+        MovieVO mvo = map.get(String.valueOf(position + 1));
+        if (mvo != null) {
+            if (mvo.getRank().equals(String.valueOf(position + 1))) {
+                holder.rank_tv.setText(mvo.getRank());
+                holder.movieNm_tv.setText(mvo.getMovieNm());
+                holder.openDt_tv.setText("개봉일 : " + mvo.getOpenDt());
+                holder.audiAcc_tv.setText("누적 관객수 : " + mvo.getAudiAcc());
+
+                holder.pudDate_tv.setText(mvo.getPubDate());
+                holder.actor_tv.setText(mvo.getActor());
+                holder.userRating_tv.setText(mvo.getUserRating());
+                Glide.with(mcontext).load(mvo.getImage()).override(100, 100).into(holder.image);
+            }
+        }
     }
 
     @Override
     public int getItemCount() {
-        return mdata.size();
+        return map.size();
     }
 
-    // 클릭 시 상세 페이지 진입을 위해 클릭리스너 인터페이스
+    // 카드뷰 펼치기
     public interface onClickListener {
         void onClickListener(View v, String movieNm);
     }
@@ -135,4 +161,12 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.View
         this.onClickListener = onClickListener;
     }
 
+    private void changeView(View info3_cl, int position) {
+        if (sparseBooleanArray.get(position)) {
+            info3_cl.setVisibility(View.VISIBLE);
+        } else {
+            info3_cl.setVisibility(View.GONE);
+        }
+        Log.d(TAG, sparseBooleanArray.toString());
+    }
 }

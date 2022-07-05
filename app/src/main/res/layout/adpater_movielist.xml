@@ -35,9 +35,11 @@
 
             <TextView
                 android:id="@+id/movieNm_tv"
-                android:layout_width="wrap_content"
+                android:layout_width="200dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
                 android:text="반지의 제왕"
                 android:textAlignment="center"
                 android:textColor="#000000"
@@ -48,14 +50,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:drawableLeft="@drawable/ic_rate_star"
                 android:text="9.8"
                 android:textAlignment="center"
                 android:textColor="#000000"
                 android:textSize="20sp" />
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/info3_ll"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/info3_cl"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
@@ -66,74 +69,64 @@
                 android:id="@+id/openDt_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="개봉일 : 2022-06-22"
+                android:text="2022-06-22"
                 android:textAlignment="center"
                 android:textColor="#000000"
-                android:textSize="15sp" />
+                android:textSize="15sp"
+                app:layout_constraintLeft_toRightOf="@+id/image"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/audiAcc_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:text="누적 관객수 : 12345612"
                 android:textAlignment="center"
                 android:textColor="#000000"
-                android:textSize="15sp" />
-        </LinearLayout>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/detail_cl"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@+id/info3_ll">
-
-            <TextView
-                android:id="@+id/title_tv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:text="영화제목"
-                android:textColor="#000000"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toTopOf="@+id/image"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:textSize="15sp"
+                app:layout_constraintLeft_toRightOf="@+id/image"
+                app:layout_constraintTop_toBottomOf="@+id/openDt_tv" />
 
             <ImageView
                 android:id="@+id/image"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@mipmap/ic_launcher"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:src="@drawable/ic_launcher_foreground"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/title_tv" />
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/pudDate_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
+                android:layout_marginTop="10dp"
                 android:text="제작년도 : 2021"
                 android:textColor="#000000"
                 android:textSize="15sp"
-                app:layout_constraintBottom_toTopOf="@+id/actor_tv"
                 app:layout_constraintLeft_toRightOf="@+id/image"
-                app:layout_constraintTop_toBottomOf="@+id/title_tv" />
+                app:layout_constraintTop_toBottomOf="@+id/audiAcc_tv" />
 
             <TextView
                 android:id="@+id/actor_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
+                android:ellipsize="end"
+                android:maxLines="1"
                 android:text="출연 배우 : "
                 android:textColor="#000000"
                 android:textSize="15sp"
                 app:layout_constraintLeft_toRightOf="@+id/image"
                 app:layout_constraintTop_toBottomOf="@+id/pudDate_tv" />
+
+            <Button
+                android:id="@+id/detailPage_btn"
+                android:layout_width="50dp"
+                android:layout_height="30dp"
+                android:background="@drawable/ic_move"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/actor_tv" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

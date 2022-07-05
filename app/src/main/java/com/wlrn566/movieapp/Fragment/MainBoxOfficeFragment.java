@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,10 +41,7 @@ public class MainBoxOfficeFragment extends Fragment {
     private final String TAG = getClass().getName();
     private View rootView;
 
-    private String image;  // 포스터
-    private String director;  // 감독
-    private String actor;  // 배우
-    private String userRating; // 평점
+    private HashMap<String, MovieVO> map = new HashMap<>();
 
     RecyclerView rv;
 
@@ -68,12 +66,12 @@ public class MainBoxOfficeFragment extends Fragment {
         rv = rootView.findViewById(R.id.rv);
 
         // 영화 순위 출력 (영화진흥위원회 api)
-        loadMovies();
+        loadBoxOffice();
 
         return rootView;
     }
 
-    private void loadMovies() {
+    private void loadBoxOffice() {
         RequestQueue queue = Volley.newRequestQueue(getActivity());
 
         final String boxOffice_url = "http://www.kobis.or.kr/kobisopenapi/webservice/rest/boxoffice/searchDailyBoxOfficeList.json";
@@ -82,40 +80,32 @@ public class MainBoxOfficeFragment extends Fragment {
 
         String url = boxOffice_url + "?key=" + key + "&targetDt=" + targetDt;
 
-        Log.d(TAG, "url = " + url);
+        Log.d("loadBoxOffice", "url = " + url);
 
-        // api 호출 및 json 으로 받기
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-//                        Log.d(TAG, "response = " + response);
-                        ArrayList<MovieVO> mvoList = new ArrayList<>();
+//                        Log.d("loadBoxOffice", "response = " + response);
                         try {
                             // 박스오피스 순위리스트 추출
                             JSONObject boxOfficeResult = response.getJSONObject("boxOfficeResult");
                             JSONArray dailyBoxOfficeList = boxOfficeResult.getJSONArray("dailyBoxOfficeList");
                             // 행, 순위, 영화제목, 개봉일, 누적관객수, 영화코드 추출  -> VO로 묶어버리기
                             for (int i = 0; i < dailyBoxOfficeList.length(); i++) {
-//                                String rnum = dailyBoxOfficeList.getJSONObject(i).getString("rnum");
                                 String rank = dailyBoxOfficeList.getJSONObject(i).getString("rank");
-//                                String movieCd = dailyBoxOfficeList.getJSONObject(i).getString("movieCd");
+                                String movieCd = dailyBoxOfficeList.getJSONObject(i).getString("movieCd");
                                 String movieNm = dailyBoxOfficeList.getJSONObject(i).getString("movieNm");
                                 String openDt = dailyBoxOfficeList.getJSONObject(i).getString("openDt");
                                 String audiAcc = dailyBoxOfficeList.getJSONObject(i).getString("audiAcc");
-//                                Log.d(TAG, rank + "등 movieNm = " + movieNm + " openDt = " + openDt + " audiAcc = " + audiAcc + " movieCd = " + movieCd);
+//                                Log.d("loadBoxOffice", rank + "등 movieNm = " + movieNm + " openDt = " + openDt + " audiAcc = " + audiAcc + " movieCd = " + movieCd);
 
-                                loadImage(movieNm);
-
-                                MovieVO mvo = new MovieVO(rank, movieNm, openDt, audiAcc, image, director, actor, userRating);
-                                mvoList.add(mvo);
-
+                                // 제작년도 찾기 (네이버 api 에서 영화를 정확히 검색하기 위함)
+                                findPrdtYear(rank, movieCd, movieNm, openDt, audiAcc);
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        // 리사이클러뷰 구현
-                        setRecycler(mvoList);
                     }
                 },
                 new Response.ErrorListener() {
@@ -129,46 +119,82 @@ public class MainBoxOfficeFragment extends Fragment {
         queue.add(request);
     }
 
-
-    private void loadImage(String movieNm) {
+    private void findPrdtYear(String rank, String movieCd, String movieNm, String openDt, String audiAcc) {
         RequestQueue queue = Volley.newRequestQueue(getActivity());
 
-        final String url = "https://openapi.naver.com/v1/search/movie.json?query=" + movieNm;
-        final String NAVER_Client_ID = BuildConfig.NAVER_Client_ID;
-        final String NAVER_Client_Secret = BuildConfig.NAVER_Client_Secret;
+        final String searchMovieInfo_url = "http://www.kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieInfo.json";
+        final String key = BuildConfig.KOBIS_KEY;
+        String url = searchMovieInfo_url + "?key=" + key + "&movieCd=" + movieCd;
 
-        Log.d(TAG, "url = " + url);
+        Log.d("findPrdtYear", "url = " + url);
 
         // api 호출
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.d(TAG, "response = " + response);
-                        ArrayList<MovieDetailVO> mdVOList = new ArrayList<>();
+//                        Log.d("findPrdtYear", "response = " + response);
                         try {
-                            // 박스오피스 순위리스트 추출
-                            JSONArray items = response.getJSONArray("items");
-                            JSONObject item = items.getJSONObject(0);
-//                            Log.d(TAG, "item = " + item);
+                            // 영화 상세정보에서 제작년도만 추출
+                            String prdtYear = response.getJSONObject("movieInfoResult").getJSONObject("movieInfo").getString("prdtYear");
+//                            Log.d("findPrdtYear", "movieNm = " + movieNm + " prdtYear = " + prdtYear);
 
-//                            String title = item.getString("title").substring(3, item.getString("title").length() - 4);  // 한글명
-                            image = item.getString("image");  // 포스터
-//                            String subtitle = item.getString("subtitle");  // 영문
-//                            String pubDate = item.getString("pubDate");  // 제작연도
-                            director = item.getString("director").substring(0, item.getString("director").length() - 1); // 감독
-                            actor = item.getString("actor").substring(0, item.getString("actor").length() - 1); // 배우
-                            userRating = item.getString("userRating"); // 평점
-
-//                            Log.d(TAG, "title = " + title + " image = " + image + " subtitle = " + subtitle + " pudDate = " + pubDate
-//                                    + " director = " + director + " actor = " + actor + " userRating = " + userRating);
-                            Log.d(TAG, " image = " + image + " subtitle = "
-                                    + " director = " + director + " actor = " + actor + " userRating = " + userRating);
+                            // 네이버 api 를 호출 -> 포스터, 감독, 배우, 평점 추출
+                            serchNAVER(rank, movieNm, openDt, audiAcc, prdtYear);
 
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError e) {
+                        Log.d(TAG, "error = " + e.toString());
+                    }
+                }) {
+        };
+        request.setShouldCache(false);
+        queue.add(request);
+    }
 
+    private void serchNAVER(String rank, String movieNm, String openDt, String audiAcc, String prdtYear) {
+        RequestQueue queue = Volley.newRequestQueue(getActivity());
+
+        final String yearfrom = String.valueOf(Integer.parseInt(prdtYear) - 1);  // 제작년도가 영화진흥위원회 정보랑 네이버검색과 다른 데이터가 있기에 오차(-1)설정 해줌
+        final String url = "https://openapi.naver.com/v1/search/movie.json?query=" + movieNm + "&yearfrom=" + yearfrom + "&yearto=" + prdtYear;
+        final String NAVER_Client_ID = BuildConfig.NAVER_Client_ID;
+        final String NAVER_Client_Secret = BuildConfig.NAVER_Client_Secret;
+
+        Log.d("loadImage", "url = " + url);
+
+        // api 호출
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+//                        Log.d("loadImage", "response = " + response);
+                        try {
+                            JSONArray items = response.getJSONArray("items");
+                            JSONObject item = items.getJSONObject(0);
+
+                            String image = item.getString("image");  // 포스터
+                            String pubDate = item.getString("pubDate");  // 제작연도
+                            String director = item.getString("director").substring(0, item.getString("director").length() - 1); // 감독
+                            String actor = (!item.getString("actor").equals("") ? item.getString("actor").substring(0, item.getString("actor").length() - 1) : ""); // 배우
+                            String userRating = item.getString("userRating"); // 평점
+//                            Log.d("loadImage", "item = " + item);
+
+                            // 배우 데이터 사이에 | 표시 바꿔주기
+                            String actor_replace = actor.replace("|", " ");
+                            MovieVO mvo = new MovieVO(rank, movieNm, openDt, audiAcc, pubDate, image, director, actor_replace, userRating);
+                            // 순위대로 map에 담아서 어댑터에 넘기기
+                            map.put(rank, mvo);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        // 리사이클러뷰 구현
+                        setRecycler(map);
                     }
                 },
                 new Response.ErrorListener() {
@@ -191,7 +217,7 @@ public class MainBoxOfficeFragment extends Fragment {
     }
 
     // 리사이클러뷰 세팅
-    private void setRecycler(ArrayList<MovieVO> mvoList) {
+    private void setRecycler(HashMap<String, MovieVO> map) {
         Log.d(TAG, "setRecycler");
         // 리사이클러뷰의 데이터가 변했을 때 사이즈를 동일하게 갱신하게 함
         rv.setHasFixedSize(true);
@@ -199,7 +225,7 @@ public class MainBoxOfficeFragment extends Fragment {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         rv.setLayoutManager(layoutManager);
         // 어댑터 할당
-        MovieListAdapter movieListAdapter = new MovieListAdapter(getActivity(), mvoList);
+        MovieListAdapter movieListAdapter = new MovieListAdapter(getActivity(), map);
         rv.setAdapter(movieListAdapter);
         // 어댑터 클릭리스너 할당 -> 영화 제목을 넘겨서 네이버 검색 api 호출
         movieListAdapter.setOnClickListener(new MovieListAdapter.onClickListener() {
@@ -207,14 +233,14 @@ public class MainBoxOfficeFragment extends Fragment {
             public void onClickListener(View v, String movieNm) {
                 Log.d(TAG, "click movie = " + movieNm);
                 // Bundle 로 영화이름 넘겨주기
-//                Bundle bundle = new Bundle();
-//                bundle.putString("movieNm", movieNm);
-//                MovieDetailFragment movieDetailFragment = new MovieDetailFragment();
-//                movieDetailFragment.setArguments(bundle);  // bundle set
-//                getActivity().getSupportFragmentManager().beginTransaction()
-//                        .replace(R.id.main_activity, movieDetailFragment)
-//                        .addToBackStack(null)  // 현재 프래그먼트를 스택에 추가하기
-//                        .commit();
+                Bundle bundle = new Bundle();
+                bundle.putString("movieNm", movieNm);
+                MovieDetailFragment movieDetailFragment = new MovieDetailFragment();
+                movieDetailFragment.setArguments(bundle);  // bundle set
+                getActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.main_activity, movieDetailFragment)
+                        .addToBackStack(null)  // 현재 프래그먼트를 스택에 추가하기
+                        .commit();
             }
         });
 

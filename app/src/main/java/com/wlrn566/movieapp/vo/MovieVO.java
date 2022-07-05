@@ -19,6 +19,7 @@ public class MovieVO {
     String audiAcc;
     String scrnCnt;
     String showCnt;
+    String pubDate;
     String image;
     String director;
     String actor;
@@ -27,14 +28,55 @@ public class MovieVO {
     public MovieVO() {
     }
 
-    public MovieVO(String rank, String movieNm, String openDt, String audiAcc, String image, String director, String actor, String userRating) {
+    public MovieVO(String rank, String movieNm, String openDt, String audiAcc, String pubDate, String image, String director, String actor, String userRating) {
         this.rank = rank;
         this.movieNm = movieNm;
         this.openDt = openDt;
         this.audiAcc = audiAcc;
+        this.pubDate = pubDate;
         this.image = image;
         this.director = director;
         this.actor = actor;
+        this.userRating = userRating;
+    }
+
+    public String getPubDate() {
+        return pubDate;
+    }
+
+    public void setPubDate(String pubDate) {
+        this.pubDate = pubDate;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public String getDirector() {
+        return director;
+    }
+
+    public void setDirector(String director) {
+        this.director = director;
+    }
+
+    public String getActor() {
+        return actor;
+    }
+
+    public void setActor(String actor) {
+        this.actor = actor;
+    }
+
+    public String getUserRating() {
+        return userRating;
+    }
+
+    public void setUserRating(String userRating) {
         this.userRating = userRating;
     }
 
@@ -182,6 +224,7 @@ public class MovieVO {
         this.showCnt = showCnt;
     }
 
+
     @Override
     public String toString() {
         return "MovieVO{" +
@@ -203,6 +246,11 @@ public class MovieVO {
                 ", audiAcc='" + audiAcc + '\'' +
                 ", scrnCnt='" + scrnCnt + '\'' +
                 ", showCnt='" + showCnt + '\'' +
+                ", pubDate='" + pubDate + '\'' +
+                ", image='" + image + '\'' +
+                ", director='" + director + '\'' +
+                ", actor='" + actor + '\'' +
+                ", userRating='" + userRating + '\'' +
                 '}';
     }
 }
