@@ -1,16 +1,22 @@
 package com.wlrn566.movieapp.Fragment;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -26,18 +32,37 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
+import com.google.gson.Gson;
 import com.wlrn566.movieapp.BuildConfig;
 import com.wlrn566.movieapp.R;
+import com.wlrn566.movieapp.adapter.MovieListAdapter;
+import com.wlrn566.movieapp.adapter.ReviewAdapter;
+import com.wlrn566.movieapp.function.RetrofitClient;
+import com.wlrn566.movieapp.function.Review;
 import com.wlrn566.movieapp.vo.MovieVO;
+import com.wlrn566.movieapp.vo.ReviewVO;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MovieDetailFragment extends Fragment implements View.OnClickListener {
+import retrofit2.Call;
+import retrofit2.Retrofit;
+
+public class MovieDetailFragment extends Fragment implements View.OnClickListener, TextWatcher {
     private final String TAG = getClass().getName();
     private View rootView;
     private MovieVO mvo;
@@ -47,6 +72,8 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
     private LinearLayout review_ll;
     private EditText review_et;
     private Button insert_btn;
+
+    private RecyclerView review_rv;
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -78,7 +105,10 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
         review_ll = rootView.findViewById(R.id.review_ll);
         review_et = rootView.findViewById(R.id.review_et);
         insert_btn = rootView.findViewById(R.id.insert_btn);
+        review_rv = rootView.findViewById(R.id.review_rv);
         insert_btn.setOnClickListener(this);
+
+        review_et.addTextChangedListener(this);
 
         setPage();
 
@@ -92,43 +122,119 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
         audiAcc_tv.setText("누적 관객수 : " + mvo.getAudiAcc());
         pudDate_tv.setText("제작년도 : " + mvo.getPubDate());
         Glide.with(getActivity()).load(mvo.getImage()).into(image);
+
+        loadReview(); // 관람평 가져오기
     }
 
-    private void insertReview(String id, String content) {
+    private void loadReview() {
         RequestQueue queue = Volley.newRequestQueue(getActivity());
 
-        final String url = "http://192.168.0.9/insert_review.php";
+        final String url = "http://192.168.0.9/load_review.php";
 
-        Log.d("loadImage", "url = " + url);
+        String id = "wlrn566";
+        String movieNm = movieNm_tv.getText().toString();
 
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        Log.d(TAG, "response = " + response);
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError e) {
-                        Log.d(TAG, "error = " + e.toString());
-                    }
-                }) {
-            @Nullable
+        try {
+            id = URLEncoder.encode(id, "utf-8");
+            movieNm = URLEncoder.encode(movieNm, "utf-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        final String encode_id = id;
+        final String encode_movieNm = movieNm;
+
+        String GET_url = url + "?id=" + encode_id + "&movieNm=" + encode_movieNm;
+        Log.d(TAG, "url = " + GET_url);
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, GET_url, null, new Response.Listener<JSONObject>() {
             @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> params = new HashMap<>();
-                params.put("id", id);
-                params.put("content", content);
-                Log.d(TAG,"params = "+params);
-                return params;
+            public void onResponse(JSONObject response) {
+                Log.d(TAG, "response = " + response);
+                try {
+                    String result_str = response.getString("result");
+                    if (result_str.equals("success")) {
+                        JSONArray review = response.getJSONArray("review");
+                        Log.d(TAG, "review = " + review);
+                        if (review.length() > 0) {
+                            // Gson 을 이용하여 관람평을 VO 로 만들어 리스트에 넣기
+                            ArrayList<ReviewVO> rvoList = new ArrayList<>();
+                            Gson gson = new Gson();
+                            for (int i = 0; i < review.length(); i++) {
+                                ReviewVO rvo = gson.fromJson(String.valueOf(review.get(i)), ReviewVO.class);
+                                rvoList.add(rvo);
+                            }
+                            setRecycler(rvoList);
+                        } else { // 등록된 관람평이 없으면
+                            review_rv.setVisibility(View.GONE);
+                        }
+                    } else {  // DB 연동 실패 시
+                        review_rv.setVisibility(View.GONE);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
-        };
-
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, error.toString());
+            }
+        });
         request.setShouldCache(false);
         queue.add(request);
     }
 
+    private void insertReview() {
+        RequestQueue queue = Volley.newRequestQueue(getActivity());
+
+        final String url = "http://192.168.0.9/insert_review.php";
+
+        String id = "wlrn566";
+        String movieNm = movieNm_tv.getText().toString();
+        String content = review_et.getText().toString();
+
+        try {
+            id = URLEncoder.encode(id, "utf-8");
+            movieNm = URLEncoder.encode(movieNm, "utf-8");
+            content = URLEncoder.encode(content, "utf-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        final String encode_id = id;
+        final String encode_content = content;
+        final String encode_movieNm = movieNm;
+
+        String GET_url = url + "?id=" + encode_id + "&movieNm=" + encode_movieNm + "&content=" + encode_content;
+        Log.d(TAG, "url = " + GET_url);
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, GET_url, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                Log.d(TAG, "response = " + response);
+                loadReview();  // 관람평 작성 시 다시 불러오기
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, error.toString());
+            }
+        });
+        request.setShouldCache(false);
+        queue.add(request);
+    }
+
+    // 리사이클러뷰 세팅
+    private void setRecycler(ArrayList<ReviewVO> rvoList) {
+        Log.d(TAG, "setRecycler");
+        review_rv.setHasFixedSize(true);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        review_rv.setLayoutManager(layoutManager);
+        ReviewAdapter reviewAdapter = new ReviewAdapter(getActivity(), rvoList);
+        review_rv.setAdapter(reviewAdapter);
+        review_rv.setVisibility(View.VISIBLE);
+    }
 
     @Override
     public void onStart() {
@@ -170,13 +276,31 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.insert_btn:
-                String content = review_et.getText().toString();
-                String id = "wlrn566";
-                insertReview(id, content);
+                // 관람평이 적혀져있을 때만 실행되게끔
+                if (!review_et.getText().toString().isEmpty() && !review_et.getText().toString().equals("") && review_et.getText().toString() != null) {
+                    insertReview();
+                } else {
+                    Log.d(TAG, "review empty");
+                }
                 break;
             default:
                 break;
         }
+    }
 
+    @Override
+    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+    }
+
+    @Override
+    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+    }
+
+    @Override
+    public void afterTextChanged(Editable editable) {
+        review_et.setText(null);
+        review_et.clearFocus();
     }
 }
