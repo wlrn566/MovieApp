@@ -1,12 +1,13 @@
 package com.wlrn566.movieapp.Fragment;
 
+import android.app.Activity;
 import android.content.Context;
-import android.os.AsyncTask;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -16,29 +17,22 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
-import com.wlrn566.movieapp.BuildConfig;
 import com.wlrn566.movieapp.R;
-import com.wlrn566.movieapp.adapter.MovieListAdapter;
 import com.wlrn566.movieapp.adapter.ReviewAdapter;
-import com.wlrn566.movieapp.function.RetrofitClient;
-import com.wlrn566.movieapp.function.Review;
 import com.wlrn566.movieapp.vo.MovieVO;
 import com.wlrn566.movieapp.vo.ReviewVO;
 
@@ -46,28 +40,17 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
-import retrofit2.Call;
-import retrofit2.Retrofit;
 
 public class MovieDetailFragment extends Fragment implements View.OnClickListener, TextWatcher {
     private final String TAG = getClass().getName();
     private View rootView;
     private MovieVO mvo;
+    private String id;
 
-    private TextView movieNm_tv, openDt_tv, actor_tv, audiAcc_tv, pudDate_tv;
+    private TextView movieNm_tv, openDt_tv, actor_tv, audiAcc_tv, pudDate_tv, need_login_tv;
     private ImageView image;
     private LinearLayout review_ll;
     private EditText review_et;
@@ -89,6 +72,10 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
             mvo = (MovieVO) getArguments().getSerializable("mvo");
             Log.d(TAG, "mvo = " + mvo);
         }
+
+        // 로그인 확인하기
+        SharedPreferences sp = getActivity().getSharedPreferences("id", Activity.MODE_PRIVATE);
+        id = sp.getString("id", null);
     }
 
     @Override
@@ -103,13 +90,27 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
         pudDate_tv = rootView.findViewById(R.id.pudDate_tv);
         image = rootView.findViewById(R.id.image);
         review_ll = rootView.findViewById(R.id.review_ll);
+        need_login_tv = rootView.findViewById(R.id.need_login_tv);
         review_et = rootView.findViewById(R.id.review_et);
         insert_btn = rootView.findViewById(R.id.insert_btn);
         review_rv = rootView.findViewById(R.id.review_rv);
+
         insert_btn.setOnClickListener(this);
 
-        review_et.addTextChangedListener(this);
+        if (id == null) {
+            review_et.setVisibility(View.GONE);
+            need_login_tv.setVisibility(View.VISIBLE);
+            need_login_tv.setClickable(true);
+            need_login_tv.setOnClickListener(this);
+            insert_btn.setVisibility(View.GONE);
+        } else {
+            review_et.setVisibility(View.VISIBLE);
+            need_login_tv.setVisibility(View.GONE);
+            need_login_tv.setClickable(false);
+            insert_btn.setVisibility(View.VISIBLE);
+            review_et.addTextChangedListener(this);
 
+        }
         setPage();
 
         return rootView;
@@ -131,20 +132,17 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
 
         final String url = "http://192.168.0.9/load_review.php";
 
-        String id = "wlrn566";
         String movieNm = movieNm_tv.getText().toString();
 
         try {
-            id = URLEncoder.encode(id, "utf-8");
             movieNm = URLEncoder.encode(movieNm, "utf-8");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
 
-        final String encode_id = id;
         final String encode_movieNm = movieNm;
 
-        String GET_url = url + "?id=" + encode_id + "&movieNm=" + encode_movieNm;
+        String GET_url = url + "?movieNm=" + encode_movieNm;
         Log.d(TAG, "url = " + GET_url);
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, GET_url, null, new Response.Listener<JSONObject>() {
@@ -282,6 +280,14 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
                 } else {
                     Log.d(TAG, "review empty");
                 }
+                break;
+            case R.id.need_login_tv:
+                // 로그인 또는 회원가입
+                LoginFragment loginFragment = new LoginFragment();
+                getActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.main_activity, loginFragment)
+                        .addToBackStack(null)
+                        .commit();
                 break;
             default:
                 break;

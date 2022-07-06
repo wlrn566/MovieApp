@@ -109,9 +109,9 @@
 
             <LinearLayout
                 android:id="@+id/review_ll"
-                android:layout_marginTop="20dp"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_marginTop="20dp"
                 android:orientation="horizontal"
                 app:layout_constraintTop_toBottomOf="@+id/info_cl">
 
@@ -124,6 +124,19 @@
                     android:layout_weight="1"
                     android:hint="관람평을 적어주세요."
                     android:textAlignment="center"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:id="@+id/need_login_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:gravity="center"
+                    android:text="로그인하고 작성하기"
+                    android:textAlignment="center"
+                    android:textColor="#00bfff"
                     android:textSize="15sp" />
 
                 <Button
@@ -144,7 +157,7 @@
                 android:id="@+id/review_rv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@+id/review_ll"/>
+                app:layout_constraintTop_toBottomOf="@+id/review_ll" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

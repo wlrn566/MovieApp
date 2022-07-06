@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -129,6 +130,12 @@ public class MainBoxOfficeFragment extends Fragment {
                         Log.d(TAG, "error = " + e.toString());
                     }
                 });
+        // volley 실패 시 다시 호출하게끔 지정
+        request.setRetryPolicy(new com.android.volley.DefaultRetryPolicy(
+                20000,
+                com.android.volley.DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                com.android.volley.DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        ));
         request.setShouldCache(false);
         queue.add(request);
     }
