@@ -7,7 +7,6 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -33,8 +32,8 @@ import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 import com.wlrn566.movieapp.R;
 import com.wlrn566.movieapp.adapter.ReviewAdapter;
-import com.wlrn566.movieapp.vo.MovieVO;
-import com.wlrn566.movieapp.vo.ReviewVO;
+import com.wlrn566.movieapp.Vo.MovieVO;
+import com.wlrn566.movieapp.Vo.ReviewVO;
 
 import org.json.JSONArray;
 import org.json.JSONException;

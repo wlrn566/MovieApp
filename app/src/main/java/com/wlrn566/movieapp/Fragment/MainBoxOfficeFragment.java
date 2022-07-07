@@ -15,7 +15,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.volley.AuthFailureError;
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -26,7 +25,7 @@ import com.facebook.shimmer.ShimmerFrameLayout;
 import com.wlrn566.movieapp.BuildConfig;
 import com.wlrn566.movieapp.R;
 import com.wlrn566.movieapp.adapter.MovieListAdapter;
-import com.wlrn566.movieapp.vo.MovieVO;
+import com.wlrn566.movieapp.Vo.MovieVO;
 
 import org.json.JSONArray;
 import org.json.JSONException;

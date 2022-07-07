@@ -1,4 +1,4 @@
-package com.wlrn566.movieapp.vo;
+package com.wlrn566.movieapp.Vo;
 
 public class ReviewVO {
     String seq;

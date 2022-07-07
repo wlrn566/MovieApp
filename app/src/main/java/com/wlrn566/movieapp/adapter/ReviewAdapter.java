@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.wlrn566.movieapp.R;
-import com.wlrn566.movieapp.vo.ReviewVO;
+import com.wlrn566.movieapp.Vo.ReviewVO;
 
 import java.util.ArrayList;
 
