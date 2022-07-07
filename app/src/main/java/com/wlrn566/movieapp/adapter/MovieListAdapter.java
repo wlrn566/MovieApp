@@ -114,13 +114,17 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.View
             if (mvo.getRank().equals(String.valueOf(position + 1))) {
                 holder.rank_tv.setText(mvo.getRank());
                 holder.movieNm_tv.setText(mvo.getMovieNm());
-                holder.openDt_tv.setText("개봉일 : " + mvo.getOpenDt());
+                holder.openDt_tv.setText("개봉일 : " + ((mvo.getOpenDt() != null && !mvo.getOpenDt().equals(" ")) ? mvo.getOpenDt() : "정보 없음"));
                 holder.audiAcc_tv.setText("누적 관객수 : " + mvo.getAudiAcc());
 
-                holder.pudDate_tv.setText("제작년도 : " + mvo.getPubDate());
-                holder.actor_tv.setText(mvo.getActor());
-                holder.userRating_tv.setText(mvo.getUserRating());
-                Glide.with(mcontext).load(mvo.getImage()).override(100, 100).into(holder.image);
+                holder.pudDate_tv.setText("제작년도 : " + ((mvo.getPubDate() != null) ? mvo.getPubDate() : "정보 없음"));
+                holder.actor_tv.setText((mvo.getActor() != null) ? mvo.getActor() : "");
+                holder.userRating_tv.setText((mvo.getUserRating() != null) ? mvo.getUserRating() : "0.0");
+                if (mvo.getImage() != null) {
+                    Glide.with(mcontext).load(mvo.getImage()).override(100, 100).into(holder.image);
+                } else {
+                    holder.image.setVisibility(View.GONE);
+                }
             }
         }
     }

@@ -193,23 +193,30 @@ public class MainBoxOfficeFragment extends Fragment {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-//                        Log.d("loadImage", "response = " + response);
+                        Log.d("loadImage", "response = " + response);
+                        MovieVO mvo = new MovieVO();
                         try {
                             JSONArray items = response.getJSONArray("items");
-                            JSONObject item = items.getJSONObject(0);
+                            if (items != null && !items.isNull(0)) {
+                                JSONObject item = items.getJSONObject(0);
 
-                            String image = item.getString("image");  // 포스터
-                            String pubDate = item.getString("pubDate");  // 제작연도
-                            String director = item.getString("director").substring(0, item.getString("director").length() - 1); // 감독
-                            String actor = (!item.getString("actor").equals("") ? item.getString("actor").substring(0, item.getString("actor").length() - 1) : ""); // 배우
-                            String userRating = item.getString("userRating"); // 평점
-//                            Log.d("loadImage", "item = " + item);
+                                String image = item.getString("image");  // 포스터
+                                String pubDate = item.getString("pubDate");  // 제작연도
+                                String director = item.getString("director").substring(0, item.getString("director").length() - 1); // 감독
+                                String actor = (!item.getString("actor").equals("") ? item.getString("actor").substring(0, item.getString("actor").length() - 1) : ""); // 배우
+                                String userRating = item.getString("userRating"); // 평점
+                                Log.d("loadImage", "item = " + item);
 
-                            // 배우 데이터 사이에 | 표시 바꿔주기
-                            String actor_replace = actor.replace("|", " ");
-                            MovieVO mvo = new MovieVO(rank, movieNm, openDt, audiAcc, pubDate, image, director, actor_replace, userRating);
+                                // 배우 데이터 사이에 | 표시 바꿔주기
+                                String actor_replace = actor.replace("|", " ");
+                                mvo = new MovieVO(rank, movieNm, openDt, audiAcc, pubDate, image, director, actor_replace, userRating);
+                            }else{
+                                // 단편영화 등은 네이버에서 없을 수도 있음
+                                mvo = new MovieVO(rank, movieNm, openDt, audiAcc, null, null, null, null, null);
+                            }
                             // 순위대로 map에 담아서 어댑터에 넘기기
                             map.put(rank, mvo);
+                            Log.d(TAG, "map count = " + map.size());
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -267,6 +274,7 @@ public class MainBoxOfficeFragment extends Fragment {
         Log.d(TAG, "loading");
         // 데이터가 다 들어왔을 때
         if (map.size() == 10) {
+            Log.d(TAG, "loading end");
             shimmer.stopShimmer();
             shimmer.setVisibility(View.GONE);
             rv.setVisibility(View.VISIBLE);
@@ -274,6 +282,7 @@ public class MainBoxOfficeFragment extends Fragment {
             // 리사이클러뷰 구현
             setRecycler(map);
         } else {
+            Log.d(TAG, "loading start");
             shimmer.startShimmer();
             shimmer.setVisibility(View.VISIBLE);
             rv.setVisibility(View.GONE);
