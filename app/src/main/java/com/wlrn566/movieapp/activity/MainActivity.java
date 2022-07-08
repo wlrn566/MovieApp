@@ -1,23 +1,42 @@
 package com.wlrn566.movieapp.activity;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.wlrn566.movieapp.Fragment.LoginFragment;
 import com.wlrn566.movieapp.R;
 import com.wlrn566.movieapp.Fragment.MainBoxOfficeFragment;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     // 프래그먼트가 존재할 액티비티페이지
     private final String TAG = getClass().getName();
     private long backPressedTime = 0;
+
+    private SharedPreferences preferences;
+    private String id;
+
+    // 액션바 뷰
+    private ConstraintLayout actionbar_cl;
+    private TextView title, login, logout;
 
     // 영화 순위 정보와 영화 상세 정보를 알 수 있고, 영화에 따라 사용자들의 의견을 달 수 있는 기능.
     // 프래그먼트를 이용
@@ -25,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     // 2. 리스트 클릭 시 좀 더 세부내용 펼치기 : 네이버 검색 api 사용(임시로 사용) -> 박스오피스의 영화제목 담아서 호출
     // 2. 리스트 클릭 시 좀 더 세부내용 펼치기 : KMDb api 호출 (키 승인시)
     // 3. 화살표 클릭 시 커뮤니티페이지 -> 회원가입(volley) 및 로그인(retrofit)  (mariaDB + php) 필요
+    // 4. 툴바 구성 : 페이지마다 다르게 / 로그인 기능 넣기
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,12 +52,82 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        preferences = getSharedPreferences("user", MODE_PRIVATE);
+        id = preferences.getString("id", null);
+        Log.d(TAG, "id = " + id);
+
+        // 툴바 생성
+        setToolbar();
+
         // 메인 프레그먼트로 이동(MainBoxOfficeFragment)
         MainBoxOfficeFragment mainBoxOfficeFragment = new MainBoxOfficeFragment();
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.main_activity, mainBoxOfficeFragment)
                 .addToBackStack(null)
                 .commit();
+    }
+
+    private void setToolbar() {
+        Toolbar toolbar = findViewById(R.id.toolbar);  // 액티비티에서 툴바 공간
+        setSupportActionBar(toolbar);  // 툴바를 액션바로 사용  --- 아래부터는 액션바
+        View actionbarView = getLayoutInflater().inflate(R.layout.actionbar_custom, null);  // 커스텀 액션바 레이아웃
+        ActionBar actionBar = getSupportActionBar();  // 액션바 get
+        actionBar.setDisplayHomeAsUpEnabled(false);  // 뒤로가기 생성
+        actionBar.setDisplayShowTitleEnabled(false);  // 제목 제거
+
+        // 커스텀 액션바 사이즈
+        ActionBar.LayoutParams layoutParams = new ActionBar.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+        actionBar.setCustomView(actionbarView, layoutParams); // 커스텀 액션바 set
+        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);  // 커스텀 디스플레이 옵션 설정
+
+        // 커스텀 액션바 UI 선언
+        actionbar_cl = actionbarView.findViewById(R.id.actionbar_cl);
+        title = actionbarView.findViewById(R.id.title);
+        login = actionbarView.findViewById(R.id.login);
+        logout = actionbarView.findViewById(R.id.logout);
+        if (id != null) {
+            changeActionBarView(true);
+        } else {
+            changeActionBarView(false);
+        }
+        login.setOnClickListener(this);
+        logout.setOnClickListener(this);
+    }
+
+    public void changeActionBarView(boolean b) {
+        // 로그인 상황에 따라 메뉴 텍스트 변경
+        if (b) {
+            login.setVisibility(View.GONE);
+            logout.setVisibility(View.VISIBLE);
+        } else {
+            login.setVisibility(View.VISIBLE);
+            logout.setVisibility(View.GONE);
+        }
+    }
+
+    public void changeActionBarTitle(String str) {
+        // 페이지마다 툴바 제목 변경
+        title.setText(str);
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.login:
+                LoginFragment loginFragment = new LoginFragment();
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.main_activity, loginFragment)
+                        .commit();
+                break;
+            case R.id.logout:
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putString("id", null);
+                editor.commit();
+                changeActionBarView(false);
+                break;
+            default:
+                break;
+        }
     }
 
     @Override

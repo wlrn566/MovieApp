@@ -6,6 +6,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -31,6 +33,7 @@ import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 import com.wlrn566.movieapp.R;
+import com.wlrn566.movieapp.activity.MainActivity;
 import com.wlrn566.movieapp.adapter.ReviewAdapter;
 import com.wlrn566.movieapp.Vo.MovieVO;
 import com.wlrn566.movieapp.Vo.ReviewVO;
@@ -43,7 +46,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
-public class MovieDetailFragment extends Fragment implements View.OnClickListener, TextWatcher {
+public class MovieDetailFragment extends Fragment implements View.OnClickListener {
     private final String TAG = getClass().getName();
     private View rootView;
     private MovieVO mvo;
@@ -73,8 +76,8 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
         }
 
         // 로그인 확인하기
-        SharedPreferences sp = getActivity().getSharedPreferences("id", Activity.MODE_PRIVATE);
-        id = sp.getString("id", null);
+        SharedPreferences preferences = getActivity().getSharedPreferences("user", Activity.MODE_PRIVATE);
+        id = preferences.getString("id", null);
     }
 
     @Override
@@ -96,6 +99,8 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
 
         insert_btn.setOnClickListener(this);
 
+        setToolBar();
+
         if (id == null) {
             review_et.setVisibility(View.GONE);
             need_login_tv.setVisibility(View.VISIBLE);
@@ -107,12 +112,22 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
             need_login_tv.setVisibility(View.GONE);
             need_login_tv.setClickable(false);
             insert_btn.setVisibility(View.VISIBLE);
-            review_et.addTextChangedListener(this);
-
         }
         setPage();
 
         return rootView;
+    }
+
+    private void setToolBar() {
+        // 툴바 생성
+        // 액티비티에서 툴바를 찾아줘야한다.
+        Toolbar toolbar = getActivity().findViewById(R.id.toolbar);
+        ((MainActivity) getActivity()).setSupportActionBar(toolbar);  // 툴바 획득
+        ActionBar actionBar = ((MainActivity) getActivity()).getSupportActionBar();  // 툴바를 액션바로 사용하기
+        actionBar.setDisplayHomeAsUpEnabled(false);  // 뒤로가기 생성
+        actionBar.setDisplayShowTitleEnabled(false);  // 제목 제거
+
+        ((MainActivity) getActivity()).changeActionBarTitle("상세정보");
     }
 
     private void setPage() {
@@ -210,6 +225,8 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
             @Override
             public void onResponse(JSONObject response) {
                 Log.d(TAG, "response = " + response);
+                review_et.setText(null);
+                review_et.clearFocus();
                 loadReview();  // 관람평 작성 시 다시 불러오기
             }
         }, new Response.ErrorListener() {
@@ -282,7 +299,10 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
                 break;
             case R.id.need_login_tv:
                 // 로그인 또는 회원가입
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("mvo", mvo);
                 LoginFragment loginFragment = new LoginFragment();
+                loginFragment.setArguments(bundle);
                 getActivity().getSupportFragmentManager().beginTransaction()
                         .replace(R.id.main_activity, loginFragment)
                         .addToBackStack(null)
@@ -291,21 +311,5 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
             default:
                 break;
         }
-    }
-
-    @Override
-    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-    }
-
-    @Override
-    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-    }
-
-    @Override
-    public void afterTextChanged(Editable editable) {
-        review_et.setText(null);
-        review_et.clearFocus();
     }
 }

@@ -1,8 +1,13 @@
 package com.wlrn566.movieapp.Fragment;
 
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -22,7 +27,10 @@ import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
 import com.wlrn566.movieapp.R;
 import com.wlrn566.movieapp.Service.RetrofitClient;
+import com.wlrn566.movieapp.Vo.MovieVO;
+import com.wlrn566.movieapp.Vo.ResultVO;
 import com.wlrn566.movieapp.Vo.UserVO;
+import com.wlrn566.movieapp.activity.MainActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -37,6 +45,8 @@ import retrofit2.Callback;
 
 public class LoginFragment extends Fragment implements View.OnClickListener {
     private final String TAG = getClass().getName();
+    private MovieVO mvo;
+
     private View rootView;
     private EditText id_et, pw_et;
     private Button login_btn, join_btn;
@@ -49,6 +59,10 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            mvo = (MovieVO) getArguments().getSerializable("mvo");
+            Log.d(TAG, "mvo = " + mvo);
+        }
     }
 
     @Override
@@ -63,7 +77,21 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         login_btn.setOnClickListener(this);
         join_btn.setOnClickListener(this);
 
+        setToolBar();
+
         return rootView;
+    }
+
+    private void setToolBar() {
+        // 툴바 생성
+        // 액티비티에서 툴바를 찾아줘야한다.
+        Toolbar toolbar = getActivity().findViewById(R.id.toolbar);
+        ((MainActivity) getActivity()).setSupportActionBar(toolbar);  // 툴바 획득
+        ActionBar actionBar = ((MainActivity) getActivity()).getSupportActionBar();  // 툴바를 액션바로 사용하기
+        actionBar.setDisplayHomeAsUpEnabled(false);  // 뒤로가기 생성
+        actionBar.setDisplayShowTitleEnabled(false);  // 제목 제거
+
+        ((MainActivity) getActivity()).changeActionBarTitle("로그인 하기");
     }
 
     @Override
@@ -98,15 +126,20 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         String id = id_et.getText().toString();
         String pw = pw_et.getText().toString();
 
-        Call<UserVO> getUser = RetrofitClient.getApiService().getUser(id, pw);
-        getUser.enqueue(new Callback<UserVO>() {
+        Call<ResultVO> getUser = RetrofitClient.getApiService().getUser(id, pw);
+        getUser.enqueue(new Callback<ResultVO>() {
             @Override
-            public void onResponse(Call<UserVO> call, retrofit2.Response<UserVO> response) {
-                Log.d(TAG, "response = " + response.body());
+            public void onResponse(Call<ResultVO> call, retrofit2.Response<ResultVO> response) {
+                Log.d(TAG, "response = " + response.body().getResult());
                 try {
                     if (response.body().getResult().equals("success")) {
-                        UserVO userVO = (UserVO) new Gson().fromJson(response.body().getUser(), UserVO.class);
-                        Log.d(TAG, response.body().getUser().toString());
+                        UserVO userVO = response.body().getUser();
+//                        Log.d(TAG, userVO.toString());
+
+                        // 받은 데이터를 저장
+                        setUserInfo(userVO);
+                    } else {
+                        Toast.makeText(getActivity(), "정보를 다시 확인해주세요.", Toast.LENGTH_SHORT).show();
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -114,7 +147,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
             }
 
             @Override
-            public void onFailure(Call<UserVO> call, Throwable t) {
+            public void onFailure(Call<ResultVO> call, Throwable t) {
                 System.out.println(t.toString());
             }
         });
@@ -176,5 +209,33 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         };
         request.setShouldCache(false);
         queue.add(request);
+    }
+
+    private void setUserInfo(UserVO userVO) {
+        // SharedPreferences 선언
+        // 파일이름(DB), 모드
+        // 모드 : MODE_PRIVATE (현재 앱에서만 사용가능)
+        SharedPreferences preferences = getActivity().getSharedPreferences("user", Context.MODE_PRIVATE);
+        // Editor 를 쓰겠다. -> SharedPreferences 는 읽기만 가능하기에 Editor 로 값을 변경하거나 해야함
+        SharedPreferences.Editor editor = preferences.edit();
+        // 데이터 넣기  ->  데이터 꺼내기 : preferences.getString(키값, default 값);
+        editor.putString("id", userVO.getId());
+        editor.putString("pw", userVO.getPw());
+        // commit 과 apply 를 해야 저장이 된다.
+        // commit : 반환값을 t/f 리턴 (동기식) / apply : 반환값 X (비동기)
+        editor.commit();
+
+        Log.d(TAG, preferences.getString("id", null));
+
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("mvo", mvo);
+        MovieDetailFragment movieDetailFragment = new MovieDetailFragment();
+        movieDetailFragment.setArguments(bundle);
+        getActivity().getSupportFragmentManager().beginTransaction()
+                .remove(LoginFragment.this)
+//                .replace(R.id.main_activity, movieDetailFragment)
+                .commit();
+        getActivity().getSupportFragmentManager().popBackStack();
+
     }
 }

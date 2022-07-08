@@ -1,64 +1,52 @@
 package com.wlrn566.movieapp.Vo;
 
-import com.google.gson.JsonObject;
-
 public class UserVO {
+    String seq;
+    String id;
+    String pw;
 
-    String result;
-    JsonObject user;  // google 의 JsonObject 로 받아야함 (JSONObject X)  --> "user"가 Json 으로 되어있음.
-
-    public String getResult() {
-        return result;
+    public UserVO() {
     }
 
-    public void setResult(String result) {
-        this.result = result;
+    public UserVO(String seq, String id, String pw) {
+        this.seq = seq;
+        this.id = id;
+        this.pw = pw;
     }
 
-    public JsonObject getUser() {
-        return user;
+    public String getSeq() {
+        return seq;
     }
 
-    public void setUser(JsonObject user) {
-        this.user = user;
+    public void setSeq(String seq) {
+        this.seq = seq;
     }
 
-    class user{
-        String id;
-        String pw;
+    public String getId() {
+        return id;
+    }
 
-        @Override
-        public String toString() {
-            return "user{" +
-                    "id='" + id + '\'' +
-                    ", pw='" + pw + '\'' +
-                    '}';
-        }
+    public void setId(String id) {
+        this.id = id;
+    }
 
-        public String getId() {
-            return id;
-        }
+    public String getPw() {
+        return pw;
+    }
 
-        public void setId(String id) {
-            this.id = id;
-        }
-
-        public String getPw() {
-            return pw;
-        }
-
-        public void setPw(String pw) {
-            this.pw = pw;
-        }
+    public void setPw(String pw) {
+        this.pw = pw;
     }
 
     @Override
     public String toString() {
         return "UserVO{" +
-                "result='" + result + '\'' +
-                ", user=" + user +
+                "seq='" + seq + '\'' +
+                ", id='" + id + '\'' +
+                ", pw='" + pw + '\'' +
                 '}';
     }
+
 }
 
 

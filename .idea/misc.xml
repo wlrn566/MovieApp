@@ -3,7 +3,11 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/dbop/.gradle/caches/transforms-3/2d9e164044bbae962aca42ad65fda0c0/transformed/appcompat-resources-1.4.2/res/drawable/abc_vector_test.xml" value="0.264" />
         <entry key="..\:/Users/dbop/Desktop/Apps/MovieApp/app/src/main/res/drawable/reviewbutton.xml" value="0.27" />
+        <entry key="..\:/Users/dbop/Desktop/Apps/MovieApp/app/src/main/res/layout/actionbar.xml" value="0.17135416666666667" />
+        <entry key="..\:/Users/dbop/Desktop/Apps/MovieApp/app/src/main/res/layout/actionbar_custom.xml" value="0.22282608695652173" />
+        <entry key="..\:/Users/dbop/Desktop/Apps/MovieApp/app/src/main/res/layout/actionbar_main.xml" value="0.30625" />
         <entry key="..\:/Users/dbop/Desktop/Apps/MovieApp/app/src/main/res/layout/activity_main.xml" value="0.22" />
         <entry key="..\:/Users/dbop/Desktop/Apps/MovieApp/app/src/main/res/layout/activity_movie_detail.xml" value="0.11145833333333334" />
         <entry key="..\:/Users/dbop/Desktop/Apps/MovieApp/app/src/main/res/layout/adapter_movielist.xml" value="0.12291666666666666" />
@@ -15,6 +19,10 @@
         <entry key="..\:/Users/dbop/Desktop/Apps/MovieApp/app/src/main/res/layout/fragment_movie_detail.xml" value="0.22" />
         <entry key="..\:/Users/dbop/Desktop/Apps/MovieApp/app/src/main/res/layout/loading_item.xml" value="0.27239583333333334" />
         <entry key="..\:/Users/dbop/Desktop/Apps/MovieApp/app/src/main/res/layout/shimmer_loading.xml" value="0.27239583333333334" />
+        <entry key="..\:/Users/dbop/Desktop/Apps/MovieApp/app/src/main/res/layout/toolbar.xml" value="0.4466666666666667" />
+        <entry key="..\:/Users/dbop/Desktop/Apps/MovieApp/app/src/main/res/menu/toolbar.xml" value="0.25625" />
+        <entry key="..\:/Users/dbop/Desktop/Apps/MovieApp/app/src/main/res/menu/toolbar_login.xml" value="0.23802083333333332" />
+        <entry key="..\:/Users/dbop/Desktop/Apps/MovieApp/app/src/main/res/menu/toolbar_logout.xml" value="0.23802083333333332" />
       </map>
     </option>
   </component>

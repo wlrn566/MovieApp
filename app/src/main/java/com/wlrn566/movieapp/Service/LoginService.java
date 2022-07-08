@@ -1,5 +1,6 @@
 package com.wlrn566.movieapp.Service;
 
+import com.wlrn566.movieapp.Vo.ResultVO;
 import com.wlrn566.movieapp.Vo.UserVO;
 
 import org.json.JSONArray;
@@ -14,7 +15,7 @@ import retrofit2.http.POST;
 public interface LoginService {
     @FormUrlEncoded
     @POST("/login.php")
-    Call<UserVO> getUser(
+    Call<ResultVO> getUser(
             @Field("id") String id,
             @Field("pw") String pw
     );

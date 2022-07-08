@@ -4,6 +4,9 @@ import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,6 +27,7 @@ import com.android.volley.toolbox.Volley;
 import com.facebook.shimmer.ShimmerFrameLayout;
 import com.wlrn566.movieapp.BuildConfig;
 import com.wlrn566.movieapp.R;
+import com.wlrn566.movieapp.activity.MainActivity;
 import com.wlrn566.movieapp.adapter.MovieListAdapter;
 import com.wlrn566.movieapp.Vo.MovieVO;
 
@@ -64,6 +68,9 @@ public class MainBoxOfficeFragment extends Fragment {
         Log.d(TAG, "onCreateView");
         rootView = inflater.inflate(R.layout.fragment_main_box_office, container, false);
 
+        // 툴바 생성
+        setToolBar();
+
         rv = rootView.findViewById(R.id.rv);
         shimmer = rootView.findViewById(R.id.shimmer);
         refresh = rootView.findViewById(R.id.refresh);
@@ -80,6 +87,18 @@ public class MainBoxOfficeFragment extends Fragment {
             }
         });
         return rootView;
+    }
+
+    private void setToolBar() {
+        // 툴바 생성
+        // 액티비티에서 툴바를 찾아줘야한다.
+        Toolbar toolbar = getActivity().findViewById(R.id.toolbar);
+        ((MainActivity) getActivity()).setSupportActionBar(toolbar);  // 툴바 획득
+        ActionBar actionBar = ((MainActivity) getActivity()).getSupportActionBar();  // 툴바를 액션바로 사용하기
+        actionBar.setDisplayHomeAsUpEnabled(false);  // 뒤로가기 생성
+        actionBar.setDisplayShowTitleEnabled(false);  // 제목 제거
+
+        ((MainActivity) getActivity()).changeActionBarTitle(getYesterday()+" BoxOffice");
     }
 
     private void loadBoxOffice() {
@@ -210,7 +229,7 @@ public class MainBoxOfficeFragment extends Fragment {
                                 // 배우 데이터 사이에 | 표시 바꿔주기
                                 String actor_replace = actor.replace("|", " ");
                                 mvo = new MovieVO(rank, movieNm, openDt, audiAcc, pubDate, image, director, actor_replace, userRating);
-                            }else{
+                            } else {
                                 // 단편영화 등은 네이버에서 없을 수도 있음
                                 mvo = new MovieVO(rank, movieNm, openDt, audiAcc, null, null, null, null, null);
                             }
