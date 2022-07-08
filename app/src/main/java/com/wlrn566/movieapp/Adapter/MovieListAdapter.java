@@ -1,4 +1,4 @@
-package com.wlrn566.movieapp.adapter;
+package com.wlrn566.movieapp.Adapter;
 
 import android.content.Context;
 import android.util.Log;

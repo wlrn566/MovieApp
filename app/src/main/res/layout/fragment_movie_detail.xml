@@ -127,19 +127,6 @@
                     android:textAlignment="center"
                     android:textSize="15sp" />
 
-                <TextView
-                    android:id="@+id/need_login_tv"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
-                    android:gravity="center"
-                    android:text="로그인하고 작성하기"
-                    android:textAlignment="center"
-                    android:textColor="#00bfff"
-                    android:textSize="15sp" />
-
                 <Button
                     android:id="@+id/insert_btn"
                     android:layout_width="60dp"

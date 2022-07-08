@@ -1,9 +1,7 @@
 package com.wlrn566.movieapp.Fragment;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.appcompat.app.ActionBar;
@@ -24,22 +22,17 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.gson.Gson;
 import com.wlrn566.movieapp.R;
+import com.wlrn566.movieapp.Service.AppDB;
 import com.wlrn566.movieapp.Service.RetrofitClient;
 import com.wlrn566.movieapp.Vo.MovieVO;
 import com.wlrn566.movieapp.Vo.ResultVO;
 import com.wlrn566.movieapp.Vo.UserVO;
-import com.wlrn566.movieapp.activity.MainActivity;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.wlrn566.movieapp.Activity.MainActivity;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 
@@ -137,7 +130,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 //                        Log.d(TAG, userVO.toString());
 
                         // 받은 데이터를 저장
-                        setUserInfo(userVO);
+                        setUserData(userVO);
                     } else {
                         Toast.makeText(getActivity(), "정보를 다시 확인해주세요.", Toast.LENGTH_SHORT).show();
                     }
@@ -151,7 +144,6 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                 System.out.println(t.toString());
             }
         });
-
     }
 
     private void join() {
@@ -211,31 +203,18 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         queue.add(request);
     }
 
-    private void setUserInfo(UserVO userVO) {
-        // SharedPreferences 선언
-        // 파일이름(DB), 모드
-        // 모드 : MODE_PRIVATE (현재 앱에서만 사용가능)
-        SharedPreferences preferences = getActivity().getSharedPreferences("user", Context.MODE_PRIVATE);
-        // Editor 를 쓰겠다. -> SharedPreferences 는 읽기만 가능하기에 Editor 로 값을 변경하거나 해야함
-        SharedPreferences.Editor editor = preferences.edit();
-        // 데이터 넣기  ->  데이터 꺼내기 : preferences.getString(키값, default 값);
-        editor.putString("id", userVO.getId());
-        editor.putString("pw", userVO.getPw());
-        // commit 과 apply 를 해야 저장이 된다.
-        // commit : 반환값을 t/f 리턴 (동기식) / apply : 반환값 X (비동기)
-        editor.commit();
+    private void setUserData(UserVO userVO) {
+        AppDB appDB = new AppDB();
+        appDB.putString(getActivity(), "user", "id", userVO.getId());
+        Log.d(TAG, "id = " + appDB.getString(getActivity(), "user", "id"));
 
-        Log.d(TAG, preferences.getString("id", null));
+        // 현재 메인 액티비티를 날리고 로그인 상태로 새로 시작해줌
+        goMain();
+    }
 
-        Bundle bundle = new Bundle();
-        bundle.putSerializable("mvo", mvo);
-        MovieDetailFragment movieDetailFragment = new MovieDetailFragment();
-        movieDetailFragment.setArguments(bundle);
-        getActivity().getSupportFragmentManager().beginTransaction()
-                .remove(LoginFragment.this)
-//                .replace(R.id.main_activity, movieDetailFragment)
-                .commit();
-        getActivity().getSupportFragmentManager().popBackStack();
-
+    private void goMain() {
+        getActivity().getSupportFragmentManager().popBackStackImmediate(null, getChildFragmentManager().POP_BACK_STACK_INCLUSIVE);
+        getActivity().finish();
+        startActivity(new Intent(getActivity(), MainActivity.class));
     }
 }

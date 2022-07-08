@@ -1,8 +1,6 @@
 package com.wlrn566.movieapp.Fragment;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -12,8 +10,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +19,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -33,8 +30,9 @@ import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 import com.wlrn566.movieapp.R;
-import com.wlrn566.movieapp.activity.MainActivity;
-import com.wlrn566.movieapp.adapter.ReviewAdapter;
+import com.wlrn566.movieapp.Activity.MainActivity;
+import com.wlrn566.movieapp.Adapter.ReviewAdapter;
+import com.wlrn566.movieapp.Service.AppDB;
 import com.wlrn566.movieapp.Vo.MovieVO;
 import com.wlrn566.movieapp.Vo.ReviewVO;
 
@@ -50,15 +48,16 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
     private final String TAG = getClass().getName();
     private View rootView;
     private MovieVO mvo;
-    private String id;
 
-    private TextView movieNm_tv, openDt_tv, actor_tv, audiAcc_tv, pudDate_tv, need_login_tv;
+    private TextView movieNm_tv, openDt_tv, actor_tv, audiAcc_tv, pudDate_tv;
     private ImageView image;
     private LinearLayout review_ll;
     private EditText review_et;
     private Button insert_btn;
 
     private RecyclerView review_rv;
+
+    private AppDB appDB = new AppDB();
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -74,10 +73,6 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
             mvo = (MovieVO) getArguments().getSerializable("mvo");
             Log.d(TAG, "mvo = " + mvo);
         }
-
-        // 로그인 확인하기
-        SharedPreferences preferences = getActivity().getSharedPreferences("user", Activity.MODE_PRIVATE);
-        id = preferences.getString("id", null);
     }
 
     @Override
@@ -92,7 +87,6 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
         pudDate_tv = rootView.findViewById(R.id.pudDate_tv);
         image = rootView.findViewById(R.id.image);
         review_ll = rootView.findViewById(R.id.review_ll);
-        need_login_tv = rootView.findViewById(R.id.need_login_tv);
         review_et = rootView.findViewById(R.id.review_et);
         insert_btn = rootView.findViewById(R.id.insert_btn);
         review_rv = rootView.findViewById(R.id.review_rv);
@@ -100,19 +94,6 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
         insert_btn.setOnClickListener(this);
 
         setToolBar();
-
-        if (id == null) {
-            review_et.setVisibility(View.GONE);
-            need_login_tv.setVisibility(View.VISIBLE);
-            need_login_tv.setClickable(true);
-            need_login_tv.setOnClickListener(this);
-            insert_btn.setVisibility(View.GONE);
-        } else {
-            review_et.setVisibility(View.VISIBLE);
-            need_login_tv.setVisibility(View.GONE);
-            need_login_tv.setClickable(false);
-            insert_btn.setVisibility(View.VISIBLE);
-        }
         setPage();
 
         return rootView;
@@ -288,25 +269,21 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
 
     @Override
     public void onClick(View view) {
+        // 로그인 확인하기
+        String id = appDB.getString(getActivity(), "user", "id");
         switch (view.getId()) {
             case R.id.insert_btn:
-                // 관람평이 적혀져있을 때만 실행되게끔
-                if (!review_et.getText().toString().isEmpty() && !review_et.getText().toString().equals("") && review_et.getText().toString() != null) {
-                    insertReview();
+                if (id != null) {
+                    Log.d(TAG, "id = " + id);
+                    // 관람평이 적혀져있을 때만 실행되게끔
+                    if (!review_et.getText().toString().isEmpty() && !review_et.getText().toString().equals("") && review_et.getText().toString() != null) {
+                        insertReview();
+                    } else {
+                        Log.d(TAG, "review empty");
+                    }
                 } else {
-                    Log.d(TAG, "review empty");
+                    Toast.makeText(getActivity(), "로그인이 필요한 기능입니다.", Toast.LENGTH_SHORT).show();
                 }
-                break;
-            case R.id.need_login_tv:
-                // 로그인 또는 회원가입
-                Bundle bundle = new Bundle();
-                bundle.putSerializable("mvo", mvo);
-                LoginFragment loginFragment = new LoginFragment();
-                loginFragment.setArguments(bundle);
-                getActivity().getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.main_activity, loginFragment)
-                        .addToBackStack(null)
-                        .commit();
                 break;
             default:
                 break;

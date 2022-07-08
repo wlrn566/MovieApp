@@ -14,7 +14,7 @@
         android:usesCleartextTraffic="true">
         <!-- Volley Http 접근 허용 -->
         <activity
-            android:name=".activity.MainActivity"
+            android:name=".Activity.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

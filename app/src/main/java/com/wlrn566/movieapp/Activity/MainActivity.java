@@ -1,13 +1,8 @@
-package com.wlrn566.movieapp.activity;
+package com.wlrn566.movieapp.Activity;
 
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -15,15 +10,14 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.wlrn566.movieapp.Fragment.LoginFragment;
 import com.wlrn566.movieapp.R;
 import com.wlrn566.movieapp.Fragment.MainBoxOfficeFragment;
+import com.wlrn566.movieapp.Service.AppDB;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -31,19 +25,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private final String TAG = getClass().getName();
     private long backPressedTime = 0;
 
-    private SharedPreferences preferences;
     private String id;
 
+    private AppDB appDB = new AppDB();
+
     // 액션바 뷰
-    private ConstraintLayout actionbar_cl;
     private TextView title, login, logout;
 
     // 영화 순위 정보와 영화 상세 정보를 알 수 있고, 영화에 따라 사용자들의 의견을 달 수 있는 기능.
     // 프래그먼트를 이용
     // 1. 일일 박스오피스 : 영화진흥위원회 api 사용(volley) -> 리사이클러뷰로 출력
-    // 2. 리스트 클릭 시 좀 더 세부내용 펼치기 : 네이버 검색 api 사용(임시로 사용) -> 박스오피스의 영화제목 담아서 호출
-    // 2. 리스트 클릭 시 좀 더 세부내용 펼치기 : KMDb api 호출 (키 승인시)
-    // 3. 화살표 클릭 시 커뮤니티페이지 -> 회원가입(volley) 및 로그인(retrofit)  (mariaDB + php) 필요
+    // 2-1. 리스트 클릭 시 좀 더 세부내용 펼치기 : 네이버 검색 api 사용(임시로 사용) -> 박스오피스의 영화제목 담아서 호출
+    // 2-2. 리스트 클릭 시 좀 더 세부내용 펼치기 : KMDb api 호출 (키 승인시)
+    // 3. 화살표 클릭 시 커뮤니티페이지 -> 회원가입(volley) 및 로그인(retrofit)  (mariaDB + php) 필요 + SharedPreferences
     // 4. 툴바 구성 : 페이지마다 다르게 / 로그인 기능 넣기
 
     @Override
@@ -52,8 +46,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        preferences = getSharedPreferences("user", MODE_PRIVATE);
-        id = preferences.getString("id", null);
+        id = appDB.getString(this, "user", "id");
         Log.d(TAG, "id = " + id);
 
         // 툴바 생성
@@ -81,7 +74,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);  // 커스텀 디스플레이 옵션 설정
 
         // 커스텀 액션바 UI 선언
-        actionbar_cl = actionbarView.findViewById(R.id.actionbar_cl);
         title = actionbarView.findViewById(R.id.title);
         login = actionbarView.findViewById(R.id.login);
         logout = actionbarView.findViewById(R.id.logout);
@@ -120,9 +112,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .commit();
                 break;
             case R.id.logout:
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putString("id", null);
-                editor.commit();
+                appDB.putString(this, "user", "id", null);
                 changeActionBarView(false);
                 break;
             default:

@@ -5,7 +5,6 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -27,8 +26,8 @@ import com.android.volley.toolbox.Volley;
 import com.facebook.shimmer.ShimmerFrameLayout;
 import com.wlrn566.movieapp.BuildConfig;
 import com.wlrn566.movieapp.R;
-import com.wlrn566.movieapp.activity.MainActivity;
-import com.wlrn566.movieapp.adapter.MovieListAdapter;
+import com.wlrn566.movieapp.Activity.MainActivity;
+import com.wlrn566.movieapp.Adapter.MovieListAdapter;
 import com.wlrn566.movieapp.Vo.MovieVO;
 
 import org.json.JSONArray;
