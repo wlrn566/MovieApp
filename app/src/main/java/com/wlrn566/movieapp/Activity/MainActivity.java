@@ -40,6 +40,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     // 3. 화살표 클릭 시 커뮤니티페이지 -> 회원가입(volley) 및 로그인(retrofit)  (mariaDB + php) 필요 + SharedPreferences
     // 4. 툴바 구성 : 페이지마다 다르게 / 로그인 기능 넣기
 
+
+    // 로컬호스트라서 컴퓨터가 켜져있어야하고, IP는 각 장소마다 달라짐 -> 코드에 적혀있는 장소의 ip만 DB 연결가능
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate");
