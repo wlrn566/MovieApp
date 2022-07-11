@@ -97,7 +97,7 @@ public class MainBoxOfficeFragment extends Fragment {
         actionBar.setDisplayHomeAsUpEnabled(false);  // 뒤로가기 생성
         actionBar.setDisplayShowTitleEnabled(false);  // 제목 제거
 
-        ((MainActivity) getActivity()).changeActionBarTitle(getYesterday()+" BoxOffice");
+        ((MainActivity) getActivity()).changeActionBarTitle(getYesterday() + " BoxOffice");
     }
 
     private void loadBoxOffice() {
@@ -133,8 +133,8 @@ public class MainBoxOfficeFragment extends Fragment {
                                 String audiAcc = dailyBoxOfficeList.getJSONObject(i).getString("audiAcc");
 //                                Log.d("loadBoxOffice", rank + "등 movieNm = " + movieNm + " openDt = " + openDt + " audiAcc = " + audiAcc + " movieCd = " + movieCd);
 
-                                // 제작년도 찾기 (네이버 api 에서 영화를 정확히 검색하기 위함)
                                 findPrdtYear(rank, movieCd, movieNm, openDt, audiAcc);
+
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -212,33 +212,30 @@ public class MainBoxOfficeFragment extends Fragment {
                     @Override
                     public void onResponse(JSONObject response) {
                         Log.d("loadImage", "response = " + response);
-                        MovieVO mvo = new MovieVO();
+                        String pubDate = null;
+                        String director = null;
+                        String actor = null;
+                        String userRating = null;
                         try {
                             JSONArray items = response.getJSONArray("items");
                             if (items != null && !items.isNull(0)) {
                                 JSONObject item = items.getJSONObject(0);
 
-                                String image = item.getString("image");  // 포스터
-                                String pubDate = item.getString("pubDate");  // 제작연도
-                                String director = item.getString("director").substring(0, item.getString("director").length() - 1); // 감독
-                                String actor = (!item.getString("actor").equals("") ? item.getString("actor").substring(0, item.getString("actor").length() - 1) : ""); // 배우
-                                String userRating = item.getString("userRating"); // 평점
+//                                String image = item.getString("image");  // 포스터
+                                pubDate = item.getString("pubDate");  // 제작연도
+                                director = item.getString("director").substring(0, item.getString("director").length() - 1); // 감독
+                                actor = (!item.getString("actor").equals("") ? item.getString("actor").substring(0, item.getString("actor").length() - 1) : ""); // 배우
+                                userRating = item.getString("userRating"); // 평점
                                 Log.d("loadImage", "item = " + item);
 
                                 // 배우 데이터 사이에 | 표시 바꿔주기
                                 String actor_replace = actor.replace("|", " ");
-                                mvo = new MovieVO(rank, movieNm, openDt, audiAcc, pubDate, image, director, actor_replace, userRating);
-                            } else {
-                                // 단편영화 등은 네이버에서 없을 수도 있음
-                                mvo = new MovieVO(rank, movieNm, openDt, audiAcc, null, null, null, null, null);
                             }
-                            // 순위대로 map에 담아서 어댑터에 넘기기
-                            map.put(rank, mvo);
-                            Log.d(TAG, "map count = " + map.size());
+                            // 포스터, 줄거리
+                            loadMovieInfo(rank, movieNm, openDt, audiAcc, pubDate, director, actor, userRating);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        setShimmer(map);
                     }
                 },
                 new Response.ErrorListener() {
@@ -254,6 +251,71 @@ public class MainBoxOfficeFragment extends Fragment {
                 params.put("X-Naver-Client-Secret", NAVER_Client_Secret);
                 return params;
             }
+        };
+        request.setShouldCache(false);
+        queue.add(request);
+    }
+
+    private void loadMovieInfo(String rank, String movieNm, String openDt, String audiAcc, String pubDate, String director, String actor, String userRating) {
+        RequestQueue queue = Volley.newRequestQueue(getActivity());
+        final String url = "http://api.koreafilm.or.kr/openapi-data2/wisenut/search_api/search_json2.jsp?collection=kmdb_new2&ServiceKey=";
+        final String releaseDts = openDt.replace("-", "");
+        final String key = BuildConfig.KMDb_KEY;
+        String GET_url = url + key + "&releaseDts=" + releaseDts + "&query=" + movieNm;
+
+        Log.d("loadMovieInfo", "url = " + GET_url);
+
+        // api 호출
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, GET_url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+//                        Log.d("loadMovieInfo", "response = " + response);
+                        MovieVO mvo = new MovieVO();
+                        try {
+                            String count = response.getJSONArray("Data")
+                                    .getJSONObject(0).getString("Count");
+
+                            String plot = null;
+                            String poster = null;
+
+                            if(!count.equals("0")){
+                                // 줄거리
+                                plot = response.getJSONArray("Data")
+                                        .getJSONObject(0).getJSONArray("Result")
+                                        .getJSONObject(0).getJSONObject("plots")
+                                        .getJSONArray("plot").getJSONObject(0).getString("plotText");
+                                Log.d(TAG, plot);
+
+                                // 포스터
+                                String posters = response.getJSONArray("Data")
+                                        .getJSONObject(0).getJSONArray("Result")
+                                        .getJSONObject(0).getString("posters");
+
+                                int index = posters.indexOf("|");
+                                if (index > 0) {
+                                    poster = posters.substring(0, index);
+                                } else {
+                                    poster = null;
+                                }
+                            }
+                            mvo = new MovieVO(rank, movieNm, openDt, audiAcc, pubDate, poster, plot, director, actor, userRating);
+
+                            // 순위대로 map에 담아서 어댑터에 넘기기
+                            map.put(rank, mvo);
+                            Log.d(TAG, "map count = " + map.size());
+                            setShimmer(map);
+                        } catch (JSONException e) {
+                            Log.d(TAG, e.toString());
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError e) {
+                        Log.d(TAG, "error = " + e.toString());
+                    }
+                }) {
         };
         request.setShouldCache(false);
         queue.add(request);
@@ -291,7 +353,7 @@ public class MainBoxOfficeFragment extends Fragment {
     private void setShimmer(HashMap<String, MovieVO> map) {
         Log.d(TAG, "loading");
         // 데이터가 다 들어왔을 때
-        if (map.size() == 10) {
+        if (map.size() >= 9) {
             Log.d(TAG, "loading end");
             shimmer.stopShimmer();
             shimmer.setVisibility(View.GONE);

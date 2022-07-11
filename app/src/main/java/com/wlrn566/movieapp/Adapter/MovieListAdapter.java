@@ -120,8 +120,8 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.View
                 holder.pudDate_tv.setText("제작년도 : " + ((mvo.getPubDate() != null) ? mvo.getPubDate() : "정보 없음"));
                 holder.actor_tv.setText((mvo.getActor() != null) ? mvo.getActor() : "");
                 holder.userRating_tv.setText((mvo.getUserRating() != null) ? mvo.getUserRating() : "0.0");
-                if (mvo.getImage() != null) {
-                    Glide.with(mcontext).load(mvo.getImage()).override(100, 100).into(holder.image);
+                if (mvo.getPoster() != null) {
+                    Glide.with(mcontext).load(mvo.getPoster()).override(100, 100).into(holder.image);
                 } else {
                     holder.image.setVisibility(View.GONE);
                 }

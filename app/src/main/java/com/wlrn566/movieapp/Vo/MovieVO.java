@@ -22,7 +22,8 @@ public class MovieVO implements Serializable {
     String scrnCnt;
     String showCnt;
     String pubDate;
-    String image;
+    String poster;
+    String plot;
     String director;
     String actor;
     String userRating;
@@ -30,16 +31,25 @@ public class MovieVO implements Serializable {
     public MovieVO() {
     }
 
-    public MovieVO(String rank, String movieNm, String openDt, String audiAcc, String pubDate, String image, String director, String actor, String userRating) {
+    public MovieVO(String rank, String movieNm, String openDt, String audiAcc, String pubDate, String poster, String plot, String director, String actor, String userRating) {
         this.rank = rank;
         this.movieNm = movieNm;
         this.openDt = openDt;
         this.audiAcc = audiAcc;
         this.pubDate = pubDate;
-        this.image = image;
+        this.poster = poster;
+        this.plot = plot;
         this.director = director;
         this.actor = actor;
         this.userRating = userRating;
+    }
+
+    public String getPlot() {
+        return plot;
+    }
+
+    public void setPlot(String plot) {
+        this.plot = plot;
     }
 
     public String getPubDate() {
@@ -50,12 +60,12 @@ public class MovieVO implements Serializable {
         this.pubDate = pubDate;
     }
 
-    public String getImage() {
-        return image;
+    public String getPoster() {
+        return poster;
     }
 
-    public void setImage(String image) {
-        this.image = image;
+    public void setPoster(String poster) {
+        this.poster = poster;
     }
 
     public String getDirector() {
@@ -226,7 +236,6 @@ public class MovieVO implements Serializable {
         this.showCnt = showCnt;
     }
 
-
     @Override
     public String toString() {
         return "MovieVO{" +
@@ -249,7 +258,8 @@ public class MovieVO implements Serializable {
                 ", scrnCnt='" + scrnCnt + '\'' +
                 ", showCnt='" + showCnt + '\'' +
                 ", pubDate='" + pubDate + '\'' +
-                ", image='" + image + '\'' +
+                ", poster='" + poster + '\'' +
+                ", plot='" + plot + '\'' +
                 ", director='" + director + '\'' +
                 ", actor='" + actor + '\'' +
                 ", userRating='" + userRating + '\'' +

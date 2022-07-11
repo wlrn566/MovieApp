@@ -49,7 +49,7 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
     private View rootView;
     private MovieVO mvo;
 
-    private TextView movieNm_tv, openDt_tv, actor_tv, audiAcc_tv, pudDate_tv;
+    private TextView movieNm_tv, openDt_tv, actor_tv, audiAcc_tv, pudDate_tv, plot_tv;
     private ImageView image;
     private LinearLayout review_ll;
     private EditText review_et;
@@ -85,6 +85,7 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
         actor_tv = rootView.findViewById(R.id.actor_tv);
         audiAcc_tv = rootView.findViewById(R.id.audiAcc_tv);
         pudDate_tv = rootView.findViewById(R.id.pudDate_tv);
+        plot_tv = rootView.findViewById(R.id.plot_tv);
         image = rootView.findViewById(R.id.image);
         review_ll = rootView.findViewById(R.id.review_ll);
         review_et = rootView.findViewById(R.id.review_et);
@@ -117,8 +118,8 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
         actor_tv.setText(mvo.getActor());
         audiAcc_tv.setText("누적 관객수 : " + mvo.getAudiAcc());
         pudDate_tv.setText("제작년도 : " + mvo.getPubDate());
-        Glide.with(getActivity()).load(mvo.getImage()).into(image);
-
+        plot_tv.setText(mvo.getPlot());
+        Glide.with(getActivity()).load(mvo.getPoster()).into(image);
         loadReview(); // 관람평 가져오기
     }
 

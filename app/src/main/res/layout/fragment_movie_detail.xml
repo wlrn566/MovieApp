@@ -46,7 +46,7 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/info_cl"
                 android:layout_width="wrap_content"
-                android:layout_height="100dp"
+                android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/image">
@@ -94,9 +94,20 @@
                     android:text="제작년도 : 2021"
                     android:textColor="#000000"
                     android:textSize="15sp"
-                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintBottom_toTopOf="@+id/plot_tv"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/audiAcc_tv" />
+
+                <TextView
+                    android:id="@+id/plot_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="줄거리.."
+                    android:textColor="#000000"
+                    android:textSize="15sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/pudDate_tv" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <View

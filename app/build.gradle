@@ -24,6 +24,8 @@ android {
         buildConfigField "String", "NAVER_Client_ID", properties['NAVER_Client_ID']
         buildConfigField "String", "NAVER_Client_Secret", properties['NAVER_Client_Secret']
 //        manifestPlaceholders = [KAKAO_API_KEY: KAKAO_API_KEY]
+        // KMDb 인증키
+        buildConfigField "String", "KMDb_KEY" , properties['KMDb_KEY']
 
     }
 
