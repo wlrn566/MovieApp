@@ -23,8 +23,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.wlrn566.movieapp.R;
-import com.wlrn566.movieapp.Service.AppDB;
-import com.wlrn566.movieapp.Service.RetrofitClient;
+import com.wlrn566.movieapp.Public.AppDB;
+import com.wlrn566.movieapp.Public.RetrofitClient;
 import com.wlrn566.movieapp.Vo.MovieVO;
 import com.wlrn566.movieapp.Vo.ResultVO;
 import com.wlrn566.movieapp.Vo.UserVO;
@@ -71,7 +71,6 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         join_btn.setOnClickListener(this);
 
         setToolBar();
-
         return rootView;
     }
 

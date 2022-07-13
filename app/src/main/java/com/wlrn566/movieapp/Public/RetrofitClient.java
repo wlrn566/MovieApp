@@ -1,8 +1,7 @@
-package com.wlrn566.movieapp.Service;
+package com.wlrn566.movieapp.Public;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.wlrn566.movieapp.Service.LoginService;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;

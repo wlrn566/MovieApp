@@ -32,7 +32,7 @@ import com.google.gson.Gson;
 import com.wlrn566.movieapp.R;
 import com.wlrn566.movieapp.Activity.MainActivity;
 import com.wlrn566.movieapp.Adapter.ReviewAdapter;
-import com.wlrn566.movieapp.Service.AppDB;
+import com.wlrn566.movieapp.Public.AppDB;
 import com.wlrn566.movieapp.Vo.MovieVO;
 import com.wlrn566.movieapp.Vo.ReviewVO;
 

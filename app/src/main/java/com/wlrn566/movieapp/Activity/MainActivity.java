@@ -17,7 +17,7 @@ import androidx.appcompat.widget.Toolbar;
 import com.wlrn566.movieapp.Fragment.LoginFragment;
 import com.wlrn566.movieapp.R;
 import com.wlrn566.movieapp.Fragment.MainBoxOfficeFragment;
-import com.wlrn566.movieapp.Service.AppDB;
+import com.wlrn566.movieapp.Public.AppDB;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {

@@ -1,4 +1,4 @@
-package com.wlrn566.movieapp.Service;
+package com.wlrn566.movieapp.Public;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -23,6 +23,7 @@ public class AppDB {
         // commit : 반환값을 t/f 리턴 (동기식) / apply : 반환값 X (비동기)
         editor.commit();
     }
+
 
     public void putBoolean(Context context, String db, String id, Boolean value) {
         preferences = context.getSharedPreferences(db, 0);

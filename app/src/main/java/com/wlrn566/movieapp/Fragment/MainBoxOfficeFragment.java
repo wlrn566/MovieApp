@@ -25,6 +25,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.facebook.shimmer.ShimmerFrameLayout;
 import com.wlrn566.movieapp.BuildConfig;
+import com.wlrn566.movieapp.Public.AppDB;
 import com.wlrn566.movieapp.R;
 import com.wlrn566.movieapp.Activity.MainActivity;
 import com.wlrn566.movieapp.Adapter.MovieListAdapter;
@@ -46,6 +47,8 @@ public class MainBoxOfficeFragment extends Fragment {
     private SwipeRefreshLayout refresh;  // 새로고침 창
 
     private HashMap<String, MovieVO> map;  // 데이터 담을 공간
+
+    AppDB appDB = new AppDB();
 
     RecyclerView rv;
 
@@ -279,7 +282,7 @@ public class MainBoxOfficeFragment extends Fragment {
                             String plot = null;
                             String poster = null;
 
-                            if(!count.equals("0")){
+                            if (!count.equals("0")) {
                                 // 줄거리
                                 plot = response.getJSONArray("Data")
                                         .getJSONObject(0).getJSONArray("Result")
@@ -353,7 +356,7 @@ public class MainBoxOfficeFragment extends Fragment {
     private void setShimmer(HashMap<String, MovieVO> map) {
         Log.d(TAG, "loading");
         // 데이터가 다 들어왔을 때
-        if (map.size() >= 9) {
+        if (map.size() == 10) {
             Log.d(TAG, "loading end");
             shimmer.stopShimmer();
             shimmer.setVisibility(View.GONE);
